@@ -30,7 +30,10 @@ class HalftoneEffect {
         this.ctx.fillStyle = this.settings.negative ? 'white' : 'black';
         this.ctx.strokeStyle = this.ctx.fillStyle;
         
-        const spacing = this.settings.dotSize * 2;
+        // Use smaller spacing for lines pattern
+        const spacing = this.settings.pattern === 'line' ? 
+            this.settings.dotSize : 
+            this.settings.dotSize * 2;
         
         for (let y = 0; y < this.canvas.height; y += spacing) {
             for (let x = 0; x < this.canvas.width; x += spacing) {
@@ -53,7 +56,7 @@ class HalftoneEffect {
                 const size = this.settings.dotSize * 
                     (this.settings.negative ? adjustedBrightness : (255 - adjustedBrightness)) / 255;
                 
-                if (size > 0.5) {
+                if (size > 0.5 || this.settings.pattern === 'line') {
                     this.drawPattern(x + spacing/2, y + spacing/2, size);
                 }
             }
@@ -79,11 +82,14 @@ class HalftoneEffect {
                 break;
                 
             case 'line':
-                this.ctx.beginPath();
-                this.ctx.moveTo(0, y);
-                this.ctx.lineTo(this.canvas.width, y);
-                this.ctx.lineWidth = size;
-                this.ctx.stroke();
+                // Draw continuous horizontal stripes with fixed spacing
+                const spacing = this.settings.dotSize;
+                const lineHeight = Math.max(1, size * 0.8); // Thinner lines for better contrast
+                
+                // Only draw on every other row to create stripes
+                if (Math.floor(y / spacing) % 2 === 0) {
+                    this.ctx.fillRect(0, y - lineHeight/2, this.canvas.width, lineHeight);
+                }
                 break;
                 
             case 'letter':
@@ -97,30 +103,18 @@ class HalftoneEffect {
                 }
                 break;
             
-            case 'letters2':
-                if (size > 1) { // Lower threshold for denser text
-                    // Expanded chaotic character set
-                    const chars = '@#%&WM8BOSo=+i-.:`?!*^/\\|()[]{}$<>~';
+            case 'stochastic':
+                // Stochastic pattern - random dots based on density
+                const dotCount = Math.floor(size * 3); // Number of dots based on size
+                const radius = Math.max(0.5, this.settings.dotSize * 0.2); // Small fixed radius
+                
+                for (let i = 0; i < dotCount; i++) {
+                    const offsetX = (Math.random() - 0.5) * this.settings.dotSize * 2;
+                    const offsetY = (Math.random() - 0.5) * this.settings.dotSize * 2;
                     
-                    // Draw multiple characters with slight offsets
-                    for (let i = 0; i < 3; i++) { // Draw 3 overlapping characters
-                        const randomChar = chars[Math.floor(Math.random() * chars.length)];
-                        const offsetX = (Math.random() - 0.5) * size * 0.5;
-                        const offsetY = (Math.random() - 0.5) * size * 0.5;
-                        
-                        // Randomize font size slightly
-                        const fontSize = size * (1 + (Math.random() - 0.5) * 0.3);
-                        this.ctx.font = `${fontSize}px monospace`;
-                        this.ctx.textAlign = 'center';
-                        this.ctx.textBaseline = 'middle';
-                        
-                        // Draw with slight rotation for more chaos
-                        this.ctx.save();
-                        this.ctx.translate(x + offsetX, y + offsetY);
-                        this.ctx.rotate((Math.random() - 0.5) * 0.5); // Random rotation ±0.25 radians
-                        this.ctx.fillText(randomChar, 0, 0);
-                        this.ctx.restore();
-                    }
+                    this.ctx.beginPath();
+                    this.ctx.arc(x + offsetX, y + offsetY, radius, 0, Math.PI * 2);
+                    this.ctx.fill();
                 }
                 break;
         }
