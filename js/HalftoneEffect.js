@@ -81,12 +81,11 @@ class HalftoneEffect {
                 this.ctx.fill();
                 break;
                 
-            case 'crm':
-                // Cross-hatch pattern
+            case 'x':
+                // X pattern (formerly CRM)
                 const lineWidth = Math.max(0.5, size * 0.15);
                 this.ctx.lineWidth = lineWidth;
                 
-                // Draw diagonal lines
                 this.ctx.beginPath();
                 this.ctx.moveTo(x - size, y - size);
                 this.ctx.lineTo(x + size, y + size);
@@ -142,6 +141,44 @@ class HalftoneEffect {
                     this.ctx.arc(x + offsetX, y + offsetY, radius, 0, Math.PI * 2);
                     this.ctx.fill();
                 }
+                break;
+            
+            case 'crt':
+                // CRT monitor effect with RGB subpixels
+                const rgbSize = size * 0.4;
+                const gap = rgbSize * 0.2;
+                
+                // Red subpixel
+                this.ctx.fillStyle = `rgba(255, 0, 0, ${size / this.settings.dotSize})`;
+                this.ctx.beginPath();
+                this.ctx.arc(x - rgbSize - gap, y, rgbSize, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Green subpixel
+                this.ctx.fillStyle = `rgba(0, 255, 0, ${size / this.settings.dotSize})`;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, rgbSize, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Blue subpixel
+                this.ctx.fillStyle = `rgba(0, 0, 255, ${size / this.settings.dotSize})`;
+                this.ctx.beginPath();
+                this.ctx.arc(x + rgbSize + gap, y, rgbSize, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Reset fill style
+                this.ctx.fillStyle = this.settings.negative ? 'white' : 'black';
+                break;
+            
+            case 'pixel':
+                // Simple pixelation effect
+                const pixelSize = Math.max(1, size);
+                this.ctx.fillRect(
+                    x - pixelSize/2,
+                    y - pixelSize/2,
+                    pixelSize,
+                    pixelSize
+                );
                 break;
         }
     }
