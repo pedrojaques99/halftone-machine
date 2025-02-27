@@ -6,7 +6,7 @@ class HalftoneProcessor {
         this.settings = {
             dotSize: 8,
             contrast: 100,
-            pattern: 'ellipse',
+            pattern: 'elipse',
             negative: false
         };
     }
@@ -64,7 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
         dotSize: document.getElementById('dot-size'),
         contrast: document.getElementById('contrast'),
         patterns: document.querySelectorAll('input[name="pattern"]'),
-        modes: document.querySelectorAll('input[name="mode"]')
+        modes: document.querySelectorAll('input[name="mode"]'),
+        patternColor: document.getElementById('pattern-color'),
+        resetColor: document.getElementById('reset-color'),
+        overlayColor: document.getElementById('overlay-color'),
+        overlayOpacity: document.getElementById('overlay-opacity')
     };
 
     // Add this inside the DOMContentLoaded event listener
@@ -208,6 +212,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    controls.patternColor.addEventListener('input', updateColors);
+
+    controls.resetColor.addEventListener('click', () => {
+        controls.patternColor.value = '#000000';
+        updateColors();
+    });
+
+    controls.overlayColor.addEventListener('input', updateOverlay);
+    controls.overlayOpacity.addEventListener('input', updateOverlay);
+
     function updateEffect(e) {
         // Convert kebab-case to camelCase properly
         const setting = e.target.id.replace(/-([a-z])/g, function(match, letter) {
@@ -227,6 +241,33 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update active video processor if exists
         if (activeVideoProcessor) {
             activeVideoProcessor.updateSettings({ [setting]: value });
+        }
+    }
+
+    function updateColors() {
+        processor.updateSettings({ 
+            color: controls.patternColor.value
+        });
+        if (currentFile) processor.processImage(currentFile);
+    }
+
+    function updateOverlay() {
+        const opacity = controls.overlayOpacity.value;
+        controls.overlayOpacity.nextElementSibling.textContent = opacity + '%';
+        
+        processor.updateSettings({
+            overlayColor: controls.overlayColor.value,
+            overlayOpacity: opacity
+        });
+        
+        if (currentFile) processor.processImage(currentFile);
+        
+        // Update video processor if active
+        if (activeVideoProcessor) {
+            activeVideoProcessor.updateSettings({
+                overlayColor: controls.overlayColor.value,
+                overlayOpacity: opacity
+            });
         }
     }
 

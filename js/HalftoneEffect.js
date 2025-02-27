@@ -5,8 +5,12 @@ class HalftoneEffect {
         this.settings = {
             dotSize: 8,
             contrast: 100,
-            pattern: 'ellipse',
-            negative: false
+            pattern: 'elipse',
+            negative: false,
+            color: '#000000',
+            secondaryColor: '#666666',
+            overlayColor: '#ffffff',
+            overlayOpacity: 0
         };
     }
 
@@ -61,11 +65,54 @@ class HalftoneEffect {
                 }
             }
         }
+
+        // After drawing the halftone effect, apply overlay
+        if (this.settings.overlayOpacity > 0) {
+            this.applyOverlay();
+        }
     }
 
     drawPattern(x, y, size) {
         switch (this.settings.pattern) {
-            case 'ellipse':
+            case 'elipse':
+            case 'diamond':
+            case 'x':
+            case 'star':
+            case 'pixel':
+            case 'letter':
+            case 'stochastic':
+                this.ctx.fillStyle = this.settings.negative ? 
+                    'white' : this.settings.color;
+                this.ctx.strokeStyle = this.ctx.fillStyle;
+                break;
+                
+            case 'crt':
+                const color1 = this.hexToRgb(this.settings.color);
+                const color2 = this.hexToRgb(this.settings.secondaryColor);
+                const luminance = (0.299 * color1.r + 0.587 * color1.g + 0.114 * color1.b) / 255;
+                const opacity = size / this.settings.dotSize * (1 + luminance) / 2;
+                
+                this.ctx.fillStyle = `rgba(${color1.r}, 0, 0, ${opacity})`;
+                this.ctx.beginPath();
+                this.ctx.arc(x - size * 0.4 - size * 0.2, y, size * 0.4, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.fillStyle = `rgba(0, ${color2.g}, 0, ${opacity})`;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, size * 0.4, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.fillStyle = `rgba(0, 0, ${color1.b}, ${opacity})`;
+                this.ctx.beginPath();
+                this.ctx.arc(x + size * 0.4 + size * 0.2, y, size * 0.4, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.fillStyle = this.settings.negative ? 'white' : 'black';
+                break;
+        }
+        
+        switch (this.settings.pattern) {
+            case 'elipse':
                 this.ctx.beginPath();
                 this.ctx.arc(x, y, size, 0, Math.PI * 2);
                 this.ctx.fill();
@@ -96,7 +143,7 @@ class HalftoneEffect {
                 
             case 'star':
                 // Draw a 5-pointed star
-                const spikes = 5;
+                const spikes = 4;
                 const outerRadius = size;
                 const innerRadius = size * 0.4;
                 
@@ -119,9 +166,9 @@ class HalftoneEffect {
                 
             case 'letter':
                 if (size > 2) {
-                    const chars = '@#%&WM8BOSo=+i-.:`';
+                    const chars = 'ABC1023456789!@#%&WM8BOSo=+i-.:`';
                     const index = Math.floor((chars.length - 1) * (size / this.settings.dotSize));
-                    this.ctx.font = `${size * 1.5}px monospace`;
+                    this.ctx.font = `${size * 2}px monospace`;
                     this.ctx.textAlign = 'center';
                     this.ctx.textBaseline = 'middle';
                     this.ctx.fillText(chars[index], x, y);
@@ -143,33 +190,6 @@ class HalftoneEffect {
                 }
                 break;
             
-            case 'crt':
-                // CRT monitor effect with RGB subpixels
-                const rgbSize = size * 0.4;
-                const gap = rgbSize * 0.2;
-                
-                // Red subpixel
-                this.ctx.fillStyle = `rgba(255, 0, 0, ${size / this.settings.dotSize})`;
-                this.ctx.beginPath();
-                this.ctx.arc(x - rgbSize - gap, y, rgbSize, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Green subpixel
-                this.ctx.fillStyle = `rgba(0, 255, 0, ${size / this.settings.dotSize})`;
-                this.ctx.beginPath();
-                this.ctx.arc(x, y, rgbSize, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Blue subpixel
-                this.ctx.fillStyle = `rgba(0, 0, 255, ${size / this.settings.dotSize})`;
-                this.ctx.beginPath();
-                this.ctx.arc(x + rgbSize + gap, y, rgbSize, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Reset fill style
-                this.ctx.fillStyle = this.settings.negative ? 'white' : 'black';
-                break;
-            
             case 'pixel':
                 // Simple pixelation effect
                 const pixelSize = Math.max(1, size);
@@ -186,5 +206,35 @@ class HalftoneEffect {
     adjustContrast(value) {
         const factor = (259 * (this.settings.contrast + 255)) / (255 * (259 - this.settings.contrast));
         return Math.min(255, Math.max(0, factor * (value - 128) + 128));
+    }
+
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 0, g: 0, b: 0 };
+    }
+
+    applyOverlay() {
+        const opacity = this.settings.overlayOpacity / 100;
+        this.ctx.save();
+        
+        // Use multiply blend mode
+        this.ctx.globalCompositeOperation = 'multiply';
+        this.ctx.globalAlpha = opacity;
+        this.ctx.fillStyle = this.settings.overlayColor;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Add a white layer with screen blend mode to handle brightness
+        if (opacity > 0) {
+            this.ctx.globalCompositeOperation = 'screen';
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.globalAlpha = 1 - opacity;
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+        
+        this.ctx.restore();
     }
 } 

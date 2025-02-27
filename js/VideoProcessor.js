@@ -34,9 +34,12 @@ class VideoProcessor {
     processFrame() {
         if (this.video.paused || this.video.ended) return;
         
-        // Draw the current video frame
+        // Get scaled dimensions
+        const dims = this.setupVideoCanvas(this.video);
+        
+        // Clear and draw video frame
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.drawImage(this.video, dims.x, dims.y, dims.width, dims.height);
         
         // Apply halftone effect
         this.halftoneEffect.process();
@@ -51,13 +54,13 @@ class VideoProcessor {
         this.isRecording = true;
         this.recordedChunks = [];
         
-        // Create a stream from the canvas
-        const stream = this.canvas.captureStream(30); // 30 FPS
+        // Create a high quality stream from the canvas
+        const stream = this.canvas.captureStream(60); // 60 FPS
         
-        // Setup media recorder
+        // Setup media recorder with high quality settings
         this.mediaRecorder = new MediaRecorder(stream, {
             mimeType: 'video/webm;codecs=vp9',
-            videoBitsPerSecond: 2500000 // 2.5 Mbps
+            videoBitsPerSecond: 8000000 // 8 Mbps for high quality
         });
         
         this.mediaRecorder.ondataavailable = (event) => {
@@ -118,5 +121,27 @@ class VideoProcessor {
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         }, 100);
+    }
+    
+    // Update canvas size for video processing
+    setupVideoCanvas(video) {
+        // Set canvas to 1080p resolution
+        this.canvas.width = 1920;
+        this.canvas.height = 1080;
+        
+        // Scale video to fit while maintaining aspect ratio
+        const scale = Math.max(
+            this.canvas.width / video.videoWidth,
+            this.canvas.height / video.videoHeight
+        );
+        
+        const scaledWidth = video.videoWidth * scale;
+        const scaledHeight = video.videoHeight * scale;
+        
+        // Center the video
+        const x = (this.canvas.width - scaledWidth) / 2;
+        const y = (this.canvas.height - scaledHeight) / 2;
+        
+        return { x, y, width: scaledWidth, height: scaledHeight };
     }
 }

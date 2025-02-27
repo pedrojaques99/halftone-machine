@@ -62,11 +62,33 @@
                 </div>
 
                 <div class="control-group">
+                    <label>Pattern Color</label>
+                    <div class="color-picker-container">
+                        <input type="color" id="pattern-color" value="#000000" title="Pattern Color">
+                        <button id="reset-color" title="Reset color">
+                            <svg viewBox="0 0 24 24" width="12" height="12">
+                                <path d="M2 12c0 5 4 9 9 9s9-4 9-9s-4-9-9-9C7.9 3 4.7 5.3 3.5 8.5"/>
+                                <polyline points="2 5 3.5 8.5 7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Overlay Color</label>
+                    <div class="color-picker-container">
+                        <input type="color" id="overlay-color" value="#ffffff00" title="Overlay Color">
+                        <input type="range" id="overlay-opacity" min="0" max="100" value="0">
+                        <span class="slider-value" id="overlay-opacity-value">0%</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
                     <label>Halftone Pattern</label>
                     <div class="radio-group">
                         <label class="radio-option active">
-                            <input type="radio" name="pattern" value="ellipse" checked>
-                            Ellipse
+                            <input type="radio" name="pattern" value="elipse" checked>
+                            Elipse
                         </label>
                         <label class="radio-option">
                             <input type="radio" name="pattern" value="diamond">
