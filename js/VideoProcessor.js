@@ -13,6 +13,15 @@ class VideoProcessor {
         this.mediaRecorder = null;
         this.recordedChunks = [];
         this.isRecording = false;
+        
+        // Video processing settings
+        this.processingResolution = {
+            width: 1280,  // 720p default for better performance
+            height: 720
+        };
+        this.lastFrameTime = 0;
+        this.targetFPS = 30;
+        this.frameInterval = 1000 / this.targetFPS;
     }
     
     start() {
@@ -34,6 +43,17 @@ class VideoProcessor {
     processFrame() {
         if (this.video.paused || this.video.ended) return;
         
+        const currentTime = performance.now();
+        const elapsed = currentTime - this.lastFrameTime;
+        
+        // Skip frame if we're ahead of schedule
+        if (elapsed < this.frameInterval) {
+            this.animationFrame = requestAnimationFrame(() => this.processFrame());
+            return;
+        }
+        
+        this.lastFrameTime = currentTime - (elapsed % this.frameInterval);
+        
         // Get scaled dimensions
         const dims = this.setupVideoCanvas(this.video);
         
@@ -54,13 +74,13 @@ class VideoProcessor {
         this.isRecording = true;
         this.recordedChunks = [];
         
-        // Create a high quality stream from the canvas
-        const stream = this.canvas.captureStream(60); // 60 FPS
+        // Create a stream from the canvas with target FPS
+        const stream = this.canvas.captureStream(this.targetFPS);
         
-        // Setup media recorder with high quality settings
+        // Setup media recorder with optimized settings
         this.mediaRecorder = new MediaRecorder(stream, {
             mimeType: 'video/webm;codecs=vp9',
-            videoBitsPerSecond: 8000000 // 8 Mbps for high quality
+            videoBitsPerSecond: 5000000 // 5 Mbps for good balance of quality and performance
         });
         
         this.mediaRecorder.ondataavailable = (event) => {
@@ -125,12 +145,12 @@ class VideoProcessor {
     
     // Update canvas size for video processing
     setupVideoCanvas(video) {
-        // Set canvas to 1080p resolution
-        this.canvas.width = 1920;
-        this.canvas.height = 1080;
+        // Set canvas to processing resolution
+        this.canvas.width = this.processingResolution.width;
+        this.canvas.height = this.processingResolution.height;
         
         // Scale video to fit while maintaining aspect ratio
-        const scale = Math.max(
+        const scale = Math.min(
             this.canvas.width / video.videoWidth,
             this.canvas.height / video.videoHeight
         );
@@ -143,5 +163,17 @@ class VideoProcessor {
         const y = (this.canvas.height - scaledHeight) / 2;
         
         return { x, y, width: scaledWidth, height: scaledHeight };
+    }
+    
+    // Add method to change processing resolution
+    setProcessingResolution(width, height) {
+        this.processingResolution = { width, height };
+        this.setupVideoCanvas(this.video);
+    }
+    
+    // Add method to change target FPS
+    setTargetFPS(fps) {
+        this.targetFPS = fps;
+        this.frameInterval = 1000 / fps;
     }
 }

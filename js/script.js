@@ -66,9 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
         patterns: document.querySelectorAll('input[name="pattern"]'),
         modes: document.querySelectorAll('input[name="mode"]'),
         patternColor: document.getElementById('pattern-color'),
-        resetColor: document.getElementById('reset-color'),
+        patternColorPreview: document.getElementById('pattern-color-preview'),
         overlayColor: document.getElementById('overlay-color'),
-        overlayOpacity: document.getElementById('overlay-opacity')
+        overlayColorPreview: document.getElementById('overlay-color-preview'),
+        overlayOpacity: document.getElementById('overlay-opacity'),
+        videoQuality: document.getElementById('video-quality'),
+        videoFps: document.getElementById('video-fps')
     };
 
     // Add this inside the DOMContentLoaded event listener
@@ -140,17 +143,31 @@ document.addEventListener('DOMContentLoaded', () => {
             video.loop = true;
             
             video.onloadedmetadata = () => {
-                // Set canvas size
-                const maxWidth = 800;
-                const scale = Math.min(1, maxWidth / video.videoWidth);
-                canvas.width = video.videoWidth * scale;
-                canvas.height = video.videoHeight * scale;
-                
                 // Initialize video processor
                 const videoProcessor = new VideoProcessor(video, canvas, ctx, processor.settings);
                 videoProcessor.halftoneEffect = processor.effect; // Share the same effect instance
-                activeVideoProcessor = videoProcessor;
                 
+                // Apply initial video settings
+                if (controls.videoQuality) {
+                    const quality = controls.videoQuality.value;
+                    switch (quality) {
+                        case 'low':
+                            videoProcessor.setProcessingResolution(854, 480); // 480p
+                            break;
+                        case 'medium':
+                            videoProcessor.setProcessingResolution(1280, 720); // 720p
+                            break;
+                        case 'high':
+                            videoProcessor.setProcessingResolution(1920, 1080); // 1080p
+                            break;
+                    }
+                }
+                
+                if (controls.videoFps) {
+                    videoProcessor.setTargetFPS(parseInt(controls.videoFps.value));
+                }
+                
+                activeVideoProcessor = videoProcessor;
                 video.play();
                 videoProcessor.start();
                 
@@ -213,13 +230,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     controls.patternColor.addEventListener('input', updateColors);
-
-    controls.resetColor.addEventListener('click', () => {
-        controls.patternColor.value = '#000000';
-        updateColors();
-    });
+    controls.patternColorPreview.addEventListener('click', () => controls.patternColor.click());
 
     controls.overlayColor.addEventListener('input', updateOverlay);
+    controls.overlayColorPreview.addEventListener('click', () => controls.overlayColor.click());
     controls.overlayOpacity.addEventListener('input', updateOverlay);
 
     function updateEffect(e) {
@@ -245,18 +259,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateColors() {
-        processor.updateSettings({ 
-            color: controls.patternColor.value
-        });
+        const color = controls.patternColor.value;
+        controls.patternColorPreview.style.backgroundColor = color;
+        processor.updateSettings({ color });
+        
         if (currentFile) processor.processImage(currentFile);
+        
+        // Update video processor if active
+        if (activeVideoProcessor) {
+            activeVideoProcessor.updateSettings({ color });
+        }
     }
 
     function updateOverlay() {
         const opacity = controls.overlayOpacity.value;
         controls.overlayOpacity.nextElementSibling.textContent = opacity + '%';
         
+        const color = controls.overlayColor.value;
+        controls.overlayColorPreview.style.backgroundColor = color;
+        controls.overlayColorPreview.style.opacity = Math.max(0.3, opacity / 100); // Minimum opacity of 0.3 to always show the color
+        
         processor.updateSettings({
-            overlayColor: controls.overlayColor.value,
+            overlayColor: color,
             overlayOpacity: opacity
         });
         
@@ -265,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update video processor if active
         if (activeVideoProcessor) {
             activeVideoProcessor.updateSettings({
-                overlayColor: controls.overlayColor.value,
+                overlayColor: color,
                 overlayOpacity: opacity
             });
         }
@@ -315,5 +339,34 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateThemeIcon(theme) {
         sunIcon.style.display = theme === 'light' ? 'none' : 'block';
         moonIcon.style.display = theme === 'light' ? 'block' : 'none';
+    }
+
+    // Add video quality control handler
+    if (controls.videoQuality) {
+        controls.videoQuality.addEventListener('change', (e) => {
+            if (activeVideoProcessor) {
+                const quality = e.target.value;
+                switch (quality) {
+                    case 'low':
+                        activeVideoProcessor.setProcessingResolution(854, 480);
+                        break;
+                    case 'medium':
+                        activeVideoProcessor.setProcessingResolution(1280, 720);
+                        break;
+                    case 'high':
+                        activeVideoProcessor.setProcessingResolution(1920, 1080);
+                        break;
+                }
+            }
+        });
+    }
+
+    // Add FPS control handler
+    if (controls.videoFps) {
+        controls.videoFps.addEventListener('change', (e) => {
+            if (activeVideoProcessor) {
+                activeVideoProcessor.setTargetFPS(parseInt(e.target.value));
+            }
+        });
     }
 });
