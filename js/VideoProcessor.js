@@ -6,6 +6,8 @@ class VideoProcessor {
         this.settings = {...settings};
         this.animationFrame = null;
         this.halftoneEffect = new HalftoneEffect(canvas, ctx);
+        // Initialize with correct settings
+        this.halftoneEffect.updateSettings(this.settings);
     }
     
     start() {
@@ -20,7 +22,8 @@ class VideoProcessor {
     }
     
     updateSettings(newSettings) {
-        this.settings = {...newSettings};
+        this.settings = {...this.settings, ...newSettings};
+        // Make sure to update the halftone effect's settings too
         this.halftoneEffect.updateSettings(newSettings);
     }
     
@@ -37,4 +40,4 @@ class VideoProcessor {
         // Continue animation loop
         this.animationFrame = requestAnimationFrame(() => this.processFrame());
     }
-} 
+}

@@ -2,6 +2,7 @@ class HalftoneProcessor {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
+        this.effect = new HalftoneEffect(canvas, this.ctx);
         this.settings = {
             dotSize: 8,
             contrast: 100,
@@ -13,7 +14,10 @@ class HalftoneProcessor {
     async processImage(file) {
         const img = await this.loadImage(file);
         this.setupCanvas(img);
-        this.applyHalftoneEffect(img);
+        
+        // Pass the current settings to the effect
+        this.effect.updateSettings(this.settings);
+        this.effect.process(img);
     }
 
     loadImage(file) {
@@ -34,104 +38,10 @@ class HalftoneProcessor {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    applyHalftoneEffect(img) {
-        const { dotSize, contrast, pattern, negative } = this.settings;
-        
-        // Draw original image
-        this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-        
-        // Get image data
-        const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-        const data = imageData.data;
-        
-        // Clear canvas
-        this.ctx.fillStyle = negative ? 'black' : 'white';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Set drawing color
-        this.ctx.fillStyle = negative ? 'white' : 'black';
-        this.ctx.strokeStyle = negative ? 'white' : 'black';
-        
-        const spacing = dotSize * 2;
-        
-        for (let y = 0; y < this.canvas.height; y += spacing) {
-            for (let x = 0; x < this.canvas.width; x += spacing) {
-                // Sample area for brightness
-                let sum = 0;
-                let count = 0;
-                
-                for (let sy = 0; sy < spacing; sy++) {
-                    for (let sx = 0; sx < spacing; sx++) {
-                        const idx = ((y + sy) * this.canvas.width + (x + sx)) * 4;
-                        if (idx < data.length) {
-                            sum += (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
-                            count++;
-                        }
-                    }
-                }
-                
-                const brightness = count > 0 ? sum / count : 0;
-                const adjustedBrightness = this.adjustContrast(brightness, contrast);
-                const size = dotSize * (negative ? adjustedBrightness : (255 - adjustedBrightness)) / 255;
-                
-                if (size > 0.5) {
-                    this.drawPattern(
-                        x + spacing/2, 
-                        y + spacing/2, 
-                        size, 
-                        pattern
-                    );
-                }
-            }
-        }
-    }
-
-    drawPattern(x, y, size, pattern) {
-        switch (pattern) {
-            case 'ellipse':
-                this.ctx.beginPath();
-                this.ctx.arc(x, y, size, 0, Math.PI * 2);
-                this.ctx.fill();
-                break;
-                
-            case 'diamond':
-                this.ctx.beginPath();
-                this.ctx.moveTo(x, y - size);
-                this.ctx.lineTo(x + size, y);
-                this.ctx.lineTo(x, y + size);
-                this.ctx.lineTo(x - size, y);
-                this.ctx.closePath();
-                this.ctx.fill();
-                break;
-                
-            case 'line':
-                this.ctx.beginPath();
-                this.ctx.moveTo(0, y);
-                this.ctx.lineTo(this.canvas.width, y);
-                this.ctx.lineWidth = size;
-                this.ctx.stroke();
-                break;
-                
-            case 'letter':
-                if (size > 2) {
-                    const chars = '@#%&WM8BOSo=+i-.:`';
-                    const index = Math.floor((chars.length - 1) * (size / this.settings.dotSize));
-                    this.ctx.font = `${size * 1.5}px monospace`;
-                    this.ctx.textAlign = 'center';
-                    this.ctx.textBaseline = 'middle';
-                    this.ctx.fillText(chars[index], x, y);
-                }
-                break;
-        }
-    }
-
-    adjustContrast(value, contrast) {
-        const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-        return Math.min(255, Math.max(0, factor * (value - 128) + 128));
-    }
-
-    updateSettings(settings) {
-        this.settings = { ...this.settings, ...settings };
+    updateSettings(newSettings) {
+        this.settings = { ...this.settings, ...newSettings };
+        // When settings are updated, also update the effect's settings
+        this.effect.updateSettings(this.settings);
     }
 }
 
@@ -139,7 +49,6 @@ class HalftoneProcessor {
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('preview-canvas');
     const ctx = canvas.getContext('2d');
-    const effect = new HalftoneEffect(canvas, ctx);
     const processor = new HalftoneProcessor(canvas);
     const dropZone = document.getElementById('upload-container');
     const fileInput = document.getElementById('file-input');
@@ -185,22 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
         currentFile = file;
         
         if (file.type.startsWith('image/')) {
-            const img = new Image();
-            img.onload = () => {
-                // Set canvas size
-                const maxWidth = 800;
-                const scale = Math.min(1, maxWidth / img.width);
-                canvas.width = img.width * scale;
-                canvas.height = img.height * scale;
-                
-                // Process image
-                effect.process(img);
-                
+            processor.processImage(file).then(() => {
                 // Update UI
                 exportImageBtn.classList.remove('disabled');
                 exportVideoBtn.classList.add('disabled');
-            };
-            img.src = URL.createObjectURL(file);
+            });
         } else if (file.type.startsWith('video/')) {
             const video = document.createElement('video');
             video.src = URL.createObjectURL(file);
@@ -211,8 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 canvas.width = video.videoWidth * scale;
                 canvas.height = video.videoHeight * scale;
                 
-                // Initialize video processor with same effect instance
-                const videoProcessor = new VideoProcessor(video, canvas, ctx, effect);
+                // Initialize video processor
+                const videoProcessor = new VideoProcessor(video, canvas, ctx, processor.settings);
+                videoProcessor.halftoneEffect = processor.effect; // Share the same effect instance
                 video.play();
                 videoProcessor.start();
                 
@@ -226,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Control event listeners
     controls.dotSize.addEventListener('input', updateEffect);
     controls.contrast.addEventListener('input', updateEffect);
+    
     controls.patterns.forEach(btn => {
         btn.addEventListener('change', (e) => {
             const parentLabel = e.target.closest('.radio-option');
