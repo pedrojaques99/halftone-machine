@@ -8,6 +8,9 @@ class VideoProcessor {
         this.halftoneEffect = new HalftoneEffect(canvas, ctx);
         // Initialize with correct settings
         this.halftoneEffect.updateSettings(this.settings);
+        
+        // Set video to loop
+        this.video.loop = true;
     }
     
     start() {

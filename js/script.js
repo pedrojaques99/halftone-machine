@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (file.type.startsWith('video/')) {
             const video = document.createElement('video');
             video.src = URL.createObjectURL(file);
+            video.loop = true;
             video.onloadedmetadata = () => {
                 // Set canvas size
                 const maxWidth = 800;
