@@ -123,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const controls = {
         dotSize: document.getElementById('dot-size'),
         contrast: document.getElementById('contrast'),
-        brightness: document.getElementById('brightness'),
         patterns: document.querySelectorAll('input[name="pattern"]'),
         modes: document.querySelectorAll('input[name="mode"]')
     };
@@ -165,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Control event listeners
     controls.dotSize.addEventListener('input', updateEffect);
     controls.contrast.addEventListener('input', updateEffect);
-    controls.brightness.addEventListener('input', updateEffect);
     controls.patterns.forEach(btn => {
         btn.addEventListener('change', (e) => {
             const parentLabel = e.target.closest('.radio-option');
@@ -193,8 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateEffect(e) {
         const setting = e.target.id.replace('-', '');
         const value = parseInt(e.target.value);
-        e.target.nextElementSibling.textContent = 
-            setting === 'contrast' || setting === 'brightness' ? value + '%' : value;
+        e.target.nextElementSibling.textContent = setting === 'contrast' ? value + '%' : value;
         processor.updateSettings({ [setting]: value });
         if (currentFile) processor.processImage(currentFile);
     }
