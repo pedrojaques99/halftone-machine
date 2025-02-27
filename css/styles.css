@@ -229,3 +229,41 @@ button:active {
     opacity: 0.5;
     pointer-events: none;
 }
+
+.loading-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--accent);
+    font-size: 16px;
+    font-weight: 600;
+    display: none;
+    background-color: rgba(18, 18, 18, 0.7);
+    padding: 12px 24px;
+    border-radius: 8px;
+}
+
+/* Add pulsing animation for loading */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.loading-indicator {
+    animation: pulse 1.5s infinite;
+}
+
+/* Style for recording button */
+button.recording {
+    background-color: #ff3838;
+    animation: pulse 1.5s infinite;
+}
+
+/* Blinking red dot for recording indicator */
+button.recording::before {
+    content: '⚫ ';
+    color: white;
+    animation: pulse 1s infinite;
+}

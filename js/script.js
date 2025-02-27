@@ -54,7 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('file-input');
     const exportImageBtn = document.getElementById('export-image');
     const exportVideoBtn = document.getElementById('export-video');
+    const loadingIndicator = document.querySelector('.loading-indicator');
+    
     let currentFile = null;
+    let activeVideoProcessor = null;
 
     // Setup controls
     const controls = {
@@ -91,18 +94,34 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleFile(file) {
         if (!file) return;
         
+        // Clear previous content and stop any active processing
+        if (activeVideoProcessor) {
+            activeVideoProcessor.stop();
+            activeVideoProcessor = null;
+        }
+        
+        // Reset canvas and show loading indicator
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        loadingIndicator.style.display = 'block';
+        
+        // Store the current file
         currentFile = file;
         
         if (file.type.startsWith('image/')) {
             processor.processImage(file).then(() => {
                 // Update UI
+                loadingIndicator.style.display = 'none';
                 exportImageBtn.classList.remove('disabled');
                 exportVideoBtn.classList.add('disabled');
+            }).catch(error => {
+                console.error('Error processing image:', error);
+                loadingIndicator.style.display = 'none';
             });
         } else if (file.type.startsWith('video/')) {
             const video = document.createElement('video');
             video.src = URL.createObjectURL(file);
             video.loop = true;
+            
             video.onloadedmetadata = () => {
                 // Set canvas size
                 const maxWidth = 800;
@@ -113,13 +132,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Initialize video processor
                 const videoProcessor = new VideoProcessor(video, canvas, ctx, processor.settings);
                 videoProcessor.halftoneEffect = processor.effect; // Share the same effect instance
+                activeVideoProcessor = videoProcessor;
+                
                 video.play();
                 videoProcessor.start();
                 
                 // Update UI
+                loadingIndicator.style.display = 'none';
                 exportImageBtn.classList.add('disabled');
                 exportVideoBtn.classList.remove('disabled');
             };
+            
+            video.onerror = () => {
+                console.error('Error loading video');
+                loadingIndicator.style.display = 'none';
+            };
+        } else {
+            alert('Please upload an image or video file.');
+            loadingIndicator.style.display = 'none';
         }
     }
 
@@ -136,6 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
             parentLabel.classList.add('active');
             processor.updateSettings({ pattern: e.target.value });
             if (currentFile) processor.processImage(currentFile);
+            
+            // Update active video processor if exists
+            if (activeVideoProcessor) {
+                activeVideoProcessor.updateSettings({ pattern: e.target.value });
+            }
         });
     });
 
@@ -146,8 +181,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.closest('.radio-option').classList.remove('active');
             });
             parentLabel.classList.add('active');
-            processor.updateSettings({ negative: e.target.value === 'negative' });
-            if (currentFile) processor.processImage(currentFile);
+            const isNegative = e.target.value === 'negative';
+            processor.updateSettings({ negative: isNegative });
+            
+            if (currentFile && currentFile.type.startsWith('image/')) {
+                processor.processImage(currentFile);
+            }
+            
+            // Update active video processor if exists
+            if (activeVideoProcessor) {
+                activeVideoProcessor.updateSettings({ negative: isNegative });
+            }
         });
     });
 
@@ -158,8 +202,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const value = parseInt(e.target.value);
         e.target.nextElementSibling.textContent = setting === 'contrast' ? value + '%' : value;
+        
+        // Update processor settings
         processor.updateSettings({ [setting]: value });
-        if (currentFile) processor.processImage(currentFile);
+        
+        // Update image if it's loaded
+        if (currentFile && currentFile.type.startsWith('image/')) {
+            processor.processImage(currentFile);
+        }
+        
+        // Update active video processor if exists
+        if (activeVideoProcessor) {
+            activeVideoProcessor.updateSettings({ [setting]: value });
+        }
     }
 
     // Export functionality
@@ -168,5 +223,26 @@ document.addEventListener('DOMContentLoaded', () => {
         link.download = 'halftone-export.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
+    });
+    
+    exportVideoBtn.addEventListener('click', () => {
+        if (activeVideoProcessor) {
+            // Change button text to show recording status
+            exportVideoBtn.textContent = 'Recording...';
+            exportVideoBtn.classList.add('recording');
+            
+            // Get video duration or use 5 seconds as default
+            const videoDuration = activeVideoProcessor.video.duration ? 
+                Math.min(activeVideoProcessor.video.duration * 1000, 10000) : 5000;
+            
+            // Start recording with progress feedback
+            const recordingDuration = activeVideoProcessor.startRecording(videoDuration);
+            
+            // Reset button after recording is complete
+            setTimeout(() => {
+                exportVideoBtn.textContent = 'Export Video';
+                exportVideoBtn.classList.remove('recording');
+            }, recordingDuration + 500); // Add a small buffer
+        }
     });
 });
