@@ -96,6 +96,33 @@ class HalftoneEffect {
                     this.ctx.fillText(chars[index], x, y);
                 }
                 break;
+            
+            case 'letters2':
+                if (size > 1) { // Lower threshold for denser text
+                    // Expanded chaotic character set
+                    const chars = '@#%&WM8BOSo=+i-.:`?!*^/\\|()[]{}$<>~';
+                    
+                    // Draw multiple characters with slight offsets
+                    for (let i = 0; i < 3; i++) { // Draw 3 overlapping characters
+                        const randomChar = chars[Math.floor(Math.random() * chars.length)];
+                        const offsetX = (Math.random() - 0.5) * size * 0.5;
+                        const offsetY = (Math.random() - 0.5) * size * 0.5;
+                        
+                        // Randomize font size slightly
+                        const fontSize = size * (1 + (Math.random() - 0.5) * 0.3);
+                        this.ctx.font = `${fontSize}px monospace`;
+                        this.ctx.textAlign = 'center';
+                        this.ctx.textBaseline = 'middle';
+                        
+                        // Draw with slight rotation for more chaos
+                        this.ctx.save();
+                        this.ctx.translate(x + offsetX, y + offsetY);
+                        this.ctx.rotate((Math.random() - 0.5) * 0.5); // Random rotation ±0.25 radians
+                        this.ctx.fillText(randomChar, 0, 0);
+                        this.ctx.restore();
+                    }
+                }
+                break;
         }
     }
 
