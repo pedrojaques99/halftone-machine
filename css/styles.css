@@ -5,6 +5,13 @@
     --text: #ffffff;
 }
 
+:root[data-theme="light"] {
+    --accent: #4a9c00;
+    --bg-dark: #ffffff;
+    --bg-light: #f0f0f0;
+    --text: #121212;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -266,4 +273,38 @@ button.recording::before {
     content: '⚫ ';
     color: white;
     animation: pulse 1s infinite;
+}
+
+/* Update theme toggle button styles */
+.theme-toggle {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: none;
+    border: 2px solid var(--text);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin-left: auto;
+    margin-right: 20px;
+    padding: 0;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* SVG icon styles */
+.theme-toggle svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
 }

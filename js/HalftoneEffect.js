@@ -81,15 +81,41 @@ class HalftoneEffect {
                 this.ctx.fill();
                 break;
                 
-            case 'line':
-                // Draw continuous horizontal stripes with fixed spacing
-                const spacing = this.settings.dotSize;
-                const lineHeight = Math.max(1, size * 0.8); // Thinner lines for better contrast
+            case 'crm':
+                // Cross-hatch pattern
+                const lineWidth = Math.max(0.5, size * 0.15);
+                this.ctx.lineWidth = lineWidth;
                 
-                // Only draw on every other row to create stripes
-                if (Math.floor(y / spacing) % 2 === 0) {
-                    this.ctx.fillRect(0, y - lineHeight/2, this.canvas.width, lineHeight);
+                // Draw diagonal lines
+                this.ctx.beginPath();
+                this.ctx.moveTo(x - size, y - size);
+                this.ctx.lineTo(x + size, y + size);
+                this.ctx.moveTo(x + size, y - size);
+                this.ctx.lineTo(x - size, y + size);
+                this.ctx.stroke();
+                break;
+                
+            case 'star':
+                // Draw a 5-pointed star
+                const spikes = 5;
+                const outerRadius = size;
+                const innerRadius = size * 0.4;
+                
+                this.ctx.beginPath();
+                for (let i = 0; i < spikes * 2; i++) {
+                    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                    const angle = (i * Math.PI) / spikes;
+                    const pointX = x + Math.cos(angle) * radius;
+                    const pointY = y + Math.sin(angle) * radius;
+                    
+                    if (i === 0) {
+                        this.ctx.moveTo(pointX, pointY);
+                    } else {
+                        this.ctx.lineTo(pointX, pointY);
+                    }
                 }
+                this.ctx.closePath();
+                this.ctx.fill();
                 break;
                 
             case 'letter':

@@ -67,6 +67,19 @@ document.addEventListener('DOMContentLoaded', () => {
         modes: document.querySelectorAll('input[name="mode"]')
     };
 
+    // Add this inside the DOMContentLoaded event listener
+    const themeToggle = document.getElementById('themeToggle');
+    const root = document.documentElement;
+    const sunIcon = themeToggle.querySelector('.sun-icon');
+    const moonIcon = themeToggle.querySelector('.moon-icon');
+
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        root.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    }
+
     // Event listeners
     dropZone.addEventListener('click', () => fileInput.click());
     
@@ -245,4 +258,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }, recordingDuration + 500); // Add a small buffer
         }
     });
+
+    // Handle theme toggle
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = root.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        root.setAttribute('data-theme', newTheme);
+        updateThemeIcon(newTheme);
+        
+        // Save preference
+        localStorage.setItem('theme', newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+        sunIcon.style.display = theme === 'light' ? 'none' : 'block';
+        moonIcon.style.display = theme === 'light' ? 'block' : 'none';
+    }
 });
