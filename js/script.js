@@ -138,6 +138,8 @@ class HalftoneProcessor {
 // Initialize application
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('preview-canvas');
+    const ctx = canvas.getContext('2d');
+    const effect = new HalftoneEffect(canvas, ctx);
     const processor = new HalftoneProcessor(canvas);
     const dropZone = document.getElementById('upload-container');
     const fileInput = document.getElementById('file-input');
@@ -178,12 +180,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function handleFile(file) {
-        if (file && file.type.startsWith('image/')) {
-            currentFile = file;
-            processor.processImage(file).then(() => {
+        if (!file) return;
+        
+        currentFile = file;
+        
+        if (file.type.startsWith('image/')) {
+            const img = new Image();
+            img.onload = () => {
+                // Set canvas size
+                const maxWidth = 800;
+                const scale = Math.min(1, maxWidth / img.width);
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                
+                // Process image
+                effect.process(img);
+                
+                // Update UI
                 exportImageBtn.classList.remove('disabled');
                 exportVideoBtn.classList.add('disabled');
-            });
+            };
+            img.src = URL.createObjectURL(file);
+        } else if (file.type.startsWith('video/')) {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.onloadedmetadata = () => {
+                // Set canvas size
+                const maxWidth = 800;
+                const scale = Math.min(1, maxWidth / video.videoWidth);
+                canvas.width = video.videoWidth * scale;
+                canvas.height = video.videoHeight * scale;
+                
+                // Initialize video processor with same effect instance
+                const videoProcessor = new VideoProcessor(video, canvas, ctx, effect);
+                video.play();
+                videoProcessor.start();
+                
+                // Update UI
+                exportImageBtn.classList.add('disabled');
+                exportVideoBtn.classList.remove('disabled');
+            };
         }
     }
 
