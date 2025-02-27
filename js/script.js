@@ -151,7 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function updateEffect(e) {
-        const setting = e.target.id.replace('-', '');
+        // Convert kebab-case to camelCase properly
+        const setting = e.target.id.replace(/-([a-z])/g, function(match, letter) {
+            return letter.toUpperCase();
+        });
         const value = parseInt(e.target.value);
         e.target.nextElementSibling.textContent = setting === 'contrast' ? value + '%' : value;
         processor.updateSettings({ [setting]: value });
