@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halftone Effect App</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span class="logo">Halftone</span> Effect App</h1>
+        </header>
+
+        <div id="upload-container" class="upload-area">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent);">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <p>Drag & drop or click to upload an image or video</p>
+            <input type="file" id="file-input" accept="image/*,video/*">
+        </div>
+
+        <main>
+            <div class="preview-area">
+                <canvas id="preview-canvas"></canvas>
+                <div class="loading-indicator">Processing...</div>
+            </div>
+
+            <div class="control-panel">
+                <div class="control-group">
+                    <label for="dot-size">Dot Size</label>
+                    <div class="slider-container">
+                        <input type="range" id="dot-size" min="1" max="20" value="8">
+                        <span class="slider-value" id="dot-size-value">8</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="contrast">Contrast</label>
+                    <div class="slider-container">
+                        <input type="range" id="contrast" min="0" max="200" value="100">
+                        <span class="slider-value" id="contrast-value">100%</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="brightness">Brightness</label>
+                    <div class="slider-container">
+                        <input type="range" id="brightness" min="0" max="200" value="100">
+                        <span class="slider-value" id="brightness-value">100%</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Halftone Pattern</label>
+                    <div class="radio-group">
+                        <label class="radio-option active">
+                            <input type="radio" name="pattern" value="ellipse" checked>
+                            Ellipse
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="pattern" value="diamond">
+                            Diamond
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="pattern" value="line">
+                            Lines
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="pattern" value="letter">
+                            Letters
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Image Mode</label>
+                    <div class="radio-group">
+                        <label class="radio-option active">
+                            <input type="radio" name="mode" value="normal" checked>
+                            Normal
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="mode" value="negative">
+                            Negative
+                        </label>
+                    </div>
+                </div>
+
+                <div class="export-options">
+                    <button id="export-image" class="disabled">Export Image</button>
+                    <button id="export-video" class="disabled">Export Video</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/VideoProcessor.js"></script>
+    <script src="js/HalftoneEffect.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
