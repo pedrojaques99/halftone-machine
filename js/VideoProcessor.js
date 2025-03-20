@@ -9,19 +9,32 @@ class VideoProcessor {
         this.halftoneEffect.updateSettings(this.settings);
         this.video.loop = true;
         
-        // For video export
-        this.mediaRecorder = null;
-        this.recordedChunks = [];
-        this.isRecording = false;
+        // Export settings
+        this.exportSettings = {
+            format: 'mp4',
+            quality: 'medium',
+            duration: 10000, // 10 seconds max by default
+            fps: 30
+        };
         
-        // Video processing settings
+        // Processing settings
         this.processingResolution = {
-            width: 1280,  // 720p default for better performance
+            width: 1280,
             height: 720
         };
         this.lastFrameTime = 0;
-        this.targetFPS = 30;
-        this.frameInterval = 1000 / this.targetFPS;
+        this.frameInterval = 1000 / this.exportSettings.fps;
+        
+        // Recording state
+        this.mediaRecorder = null;
+        this.recordedChunks = [];
+        this.isRecording = false;
+
+        // Available MIME types
+        this.mimeTypes = {
+            'mp4': 'video/webm;codecs=h264', // We'll convert WebM to MP4 later
+            'webm': 'video/webm;codecs=vp9'
+        };
     }
     
     start() {
@@ -33,11 +46,25 @@ class VideoProcessor {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
         }
+        this.cleanup();
+    }
+    
+    cleanup() {
+        this.stopRecording();
+        this.recordedChunks = [];
+        if (this.video.src) {
+            URL.revokeObjectURL(this.video.src);
+        }
     }
     
     updateSettings(newSettings) {
         this.settings = {...this.settings, ...newSettings};
         this.halftoneEffect.updateSettings(newSettings);
+    }
+    
+    updateExportSettings(settings) {
+        this.exportSettings = {...this.exportSettings, ...settings};
+        this.frameInterval = 1000 / this.exportSettings.fps;
     }
     
     processFrame() {
@@ -46,7 +73,6 @@ class VideoProcessor {
         const currentTime = performance.now();
         const elapsed = currentTime - this.lastFrameTime;
         
-        // Skip frame if we're ahead of schedule
         if (elapsed < this.frameInterval) {
             this.animationFrame = requestAnimationFrame(() => this.processFrame());
             return;
@@ -54,34 +80,36 @@ class VideoProcessor {
         
         this.lastFrameTime = currentTime - (elapsed % this.frameInterval);
         
-        // Get scaled dimensions
         const dims = this.setupVideoCanvas(this.video);
-        
-        // Clear and draw video frame
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.drawImage(this.video, dims.x, dims.y, dims.width, dims.height);
-        
-        // Apply halftone effect
         this.halftoneEffect.process();
         
-        // Continue animation loop
         this.animationFrame = requestAnimationFrame(() => this.processFrame());
     }
     
-    startRecording(duration = 5000) {
+    startRecording() {
         if (this.isRecording) return;
         
         this.isRecording = true;
         this.recordedChunks = [];
         
-        // Create a stream from the canvas with target FPS
-        const stream = this.canvas.captureStream(this.targetFPS);
+        const stream = this.canvas.captureStream(this.exportSettings.fps);
         
-        // Setup media recorder with optimized settings
-        this.mediaRecorder = new MediaRecorder(stream, {
-            mimeType: 'video/webm;codecs=vp9',
-            videoBitsPerSecond: 5000000 // 5 Mbps for good balance of quality and performance
-        });
+        // Always use WebM for recording (most widely supported)
+        const mimeType = 'video/webm;codecs=vp9';
+        const bitrate = this.getBitrateForQuality(this.exportSettings.quality);
+        
+        try {
+            this.mediaRecorder = new MediaRecorder(stream, {
+                mimeType,
+                videoBitsPerSecond: bitrate
+            });
+        } catch (error) {
+            console.error('MediaRecorder error:', error);
+            this.isRecording = false;
+            throw new Error('Failed to create MediaRecorder. Your browser might not support video recording.');
+        }
         
         this.mediaRecorder.ondataavailable = (event) => {
             if (event.data.size > 0) {
@@ -94,26 +122,25 @@ class VideoProcessor {
             this.exportVideo();
         };
         
-        // Start the recorder
-        this.mediaRecorder.start(100); // Collect data in 100ms chunks
+        this.mediaRecorder.onerror = (error) => {
+            console.error('Recording error:', error);
+            this.isRecording = false;
+            this.cleanup();
+        };
         
-        // Rewind and play the video from the beginning
         this.video.currentTime = 0;
         this.video.play();
         
-        // Stop recording after specified duration or video duration
-        const recordingDuration = Math.min(
-            duration, 
-            this.video.duration ? this.video.duration * 1000 : duration
+        this.mediaRecorder.start(100);
+        
+        const duration = Math.min(
+            this.exportSettings.duration,
+            this.video.duration ? this.video.duration * 1000 : this.exportSettings.duration
         );
         
-        setTimeout(() => {
-            if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-                this.mediaRecorder.stop();
-            }
-        }, recordingDuration);
+        setTimeout(() => this.stopRecording(), duration);
         
-        return recordingDuration;
+        return duration;
     }
     
     stopRecording() {
@@ -122,58 +149,58 @@ class VideoProcessor {
         }
     }
     
+    getBitrateForQuality(quality) {
+        const bitrates = {
+            low: 2500000,    // 2.5 Mbps
+            medium: 5000000, // 5 Mbps
+            high: 8000000    // 8 Mbps
+        };
+        return bitrates[quality] || bitrates.medium;
+    }
+    
     exportVideo() {
         if (this.recordedChunks.length === 0) return;
         
-        // Create a blob from the recorded chunks
-        const blob = new Blob(this.recordedChunks, { type: 'video/mp4' });
-        
-        // Create a link element to download the video
+        // Always create as WebM first
+        const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
+        
+        // Set the extension based on format setting
+        const extension = this.exportSettings.format === 'mp4' ? 'mp4' : 'webm';
+        a.download = `halftone-video.${extension}`;
         a.href = url;
-        a.download = 'halftone-video.mp4';
-        document.body.appendChild(a);
         a.click();
         
-        // Cleanup
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 100);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
     }
     
-    // Update canvas size for video processing
     setupVideoCanvas(video) {
-        // Set canvas to processing resolution
-        this.canvas.width = this.processingResolution.width;
-        this.canvas.height = this.processingResolution.height;
+        const { width, height } = this.processingResolution;
+        this.canvas.width = width;
+        this.canvas.height = height;
         
-        // Scale video to fit while maintaining aspect ratio
         const scale = Math.min(
-            this.canvas.width / video.videoWidth,
-            this.canvas.height / video.videoHeight
+            width / video.videoWidth,
+            height / video.videoHeight
         );
         
         const scaledWidth = video.videoWidth * scale;
         const scaledHeight = video.videoHeight * scale;
         
-        // Center the video
-        const x = (this.canvas.width - scaledWidth) / 2;
-        const y = (this.canvas.height - scaledHeight) / 2;
+        const x = (width - scaledWidth) / 2;
+        const y = (height - scaledHeight) / 2;
         
         return { x, y, width: scaledWidth, height: scaledHeight };
     }
     
-    // Add method to change processing resolution
     setProcessingResolution(width, height) {
         this.processingResolution = { width, height };
         this.setupVideoCanvas(this.video);
     }
     
-    // Add method to change target FPS
     setTargetFPS(fps) {
-        this.targetFPS = fps;
+        this.exportSettings.fps = fps;
         this.frameInterval = 1000 / fps;
     }
 }

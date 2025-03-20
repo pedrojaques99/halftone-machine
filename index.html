@@ -10,6 +10,17 @@
     <div class="container">
         <header>
             <h1><span class="logo">Halftone</span> Effect App</h1>
+            <div id="upload-container" class="upload-area">
+                <div class="upload-content">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent);">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Drop media or click</span>
+                    <input type="file" id="file-input" accept="video/*,image/*">
+                </div>
+            </div>
             <button class="theme-toggle" id="themeToggle" title="Alternar tema">
                 <svg class="sun-icon" viewBox="0 0 24 24" style="display: block;">
                     <circle cx="12" cy="12" r="5"></circle>
@@ -28,16 +39,6 @@
             </button>
         </header>
 
-        <div id="upload-container" class="upload-area">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent);">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            <p>Drag & drop or click to upload an image or video</p>
-            <input type="file" id="file-input" accept="image/*,video/*">
-        </div>
-
         <main>
             <div class="preview-area">
                 <canvas id="preview-canvas"></canvas>
@@ -45,6 +46,90 @@
             </div>
 
             <div class="control-panel">
+                <!-- Add video processing controls -->
+                <div class="video-controls">
+                    <div class="control-group">
+                        <div class="dropdown-label">
+                            <span>Format: MP4 (H264)</span>
+                        </div>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="video-format" value="webm">
+                                WebM (VP9)
+                            </label>
+                            <label class="radio-option active">
+                                <input type="radio" name="video-format" value="mp4" checked>
+                                MP4 (H264)
+                            </label>
+                        </div>
+                    </div>
+                
+                    <div class="control-group">
+                        <div class="dropdown-label">
+                            <span>Resolution: 720p</span>
+                        </div>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="video-quality" value="low">
+                                480p
+                            </label>
+                            <label class="radio-option active">
+                                <input type="radio" name="video-quality" value="medium" checked>
+                                720p
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="video-quality" value="high">
+                                1080p
+                            </label>
+                        </div>
+                    </div>
+                
+                    <div class="control-group">
+                        <div class="dropdown-label">
+                            <span>Quality: Medium</span>
+                        </div>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="video-bitrate" value="low">
+                                Low
+                            </label>
+                            <label class="radio-option active">
+                                <input type="radio" name="video-bitrate" value="medium" checked>
+                                Medium
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="video-bitrate" value="high">
+                                High
+                            </label>
+                        </div>
+                    </div>
+                
+                    <div class="control-group">
+                        <div class="dropdown-label">
+                            <span>FPS: 30</span>
+                        </div>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="video-fps" value="24">
+                                24
+                            </label>
+                            <label class="radio-option active">
+                                <input type="radio" name="video-fps" value="30" checked>
+                                30
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="video-fps" value="60">
+                                60
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="export-options">
+                        <button id="export-image" class="disabled">Export Image</button>
+                        <button id="export-video" class="disabled">Export Video</button>
+                    </div>  
+                </div>
                 <div class="control-group">
                     <label for="dot-size">Dot Size</label>
                     <div class="slider-container">
@@ -58,6 +143,20 @@
                     <div class="slider-container">
                         <input type="range" id="contrast" min="0" max="200" value="100">
                         <span class="slider-value" id="contrast-value">100%</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Image Mode</label>
+                    <div class="radio-group">
+                        <label class="radio-option active">
+                            <input type="radio" name="mode" value="normal" checked>
+                            Normal
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="mode" value="negative">
+                            Negative
+                        </label>
                     </div>
                 </div>
 
@@ -118,67 +217,110 @@
                         </label>
                     </div>
                 </div>
-
-                <div class="control-group">
-                    <label>Image Mode</label>
-                    <div class="radio-group">
-                        <label class="radio-option active">
-                            <input type="radio" name="mode" value="normal" checked>
-                            Normal
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="mode" value="negative">
-                            Negative
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Add video processing controls -->
-                <div class="control-group video-controls">
-                    <label>Video Quality</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="video-quality" id="video-quality" value="low">
-                            480p
-                        </label>
-                        <label class="radio-option active">
-                            <input type="radio" name="video-quality" value="medium" checked>
-                            720p
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="video-quality" value="high">
-                            1080p
-                        </label>
-                    </div>
-                </div>
-
-                <div class="control-group video-controls">
-                    <label>Target FPS</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="video-fps" id="video-fps" value="24">
-                            24
-                        </label>
-                        <label class="radio-option active">
-                            <input type="radio" name="video-fps" value="30" checked>
-                            30
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="video-fps" value="60">
-                            60
-                        </label>
-                    </div>
-                </div>
-
-                <div class="export-options">
-                    <button id="export-image" class="disabled">Export Image</button>
-                    <button id="export-video" class="disabled">Export Video</button>
-                </div>
             </div>
         </main>
     </div>
     <script src="js/VideoProcessor.js"></script>
     <script src="js/HalftoneEffect.js"></script>
     <script src="js/script.js"></script>
+    <script>
+        // Handle file upload
+        const uploadArea = document.getElementById('upload-container');
+        const fileInput = document.getElementById('file-input');
+        const exportVideoBtn = document.getElementById('export-video');
+        const exportImageBtn = document.getElementById('export-image');
+        const videoControls = document.querySelector('.video-controls');
+        let currentFile = null;
+
+        // Handle drag and drop events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        // Add drag feedback
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            uploadArea.classList.add('drag-over');
+        }
+
+        function unhighlight(e) {
+            uploadArea.classList.remove('drag-over');
+        }
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                currentFile = file;
+                
+                if (file.type.startsWith('video/')) {
+                    exportVideoBtn.classList.remove('disabled');
+                    exportImageBtn.classList.add('disabled');
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.onloadedmetadata = () => {
+                        videoControls.classList.add('show');
+                    };
+                } else if (file.type.startsWith('image/')) {
+                    exportImageBtn.classList.remove('disabled');
+                    exportVideoBtn.classList.add('disabled');
+                    videoControls.classList.remove('show');
+                } else {
+                    alert('Please upload a valid image or video file.');
+                    return;
+                }
+            }
+        }
+
+        // Handle dropdown clicks
+        document.querySelectorAll('.video-controls .dropdown-label').forEach(dropdown => {
+            dropdown.addEventListener('click', (e) => {
+                const currentGroup = e.target.closest('.control-group');
+                
+                document.querySelectorAll('.video-controls .control-group').forEach(group => {
+                    if (group !== currentGroup) {
+                        group.classList.remove('open');
+                    }
+                });
+                
+                currentGroup.classList.toggle('open');
+                e.stopPropagation();
+            });
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.control-group')) {
+                document.querySelectorAll('.control-group').forEach(group => {
+                    group.classList.remove('open');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
