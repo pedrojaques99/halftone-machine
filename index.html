@@ -46,7 +46,15 @@
             </div>
 
             <div class="control-panel">
-                <!-- Add video processing controls -->
+                <!-- Video processing controls -->
+                <div class="panel-header">
+                    <h3>Export Config</h3> 
+                    <button class="toggle-panel" data-target="video-controls">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                </div>
                 <div class="video-controls">
                     <div class="control-group">
                         <div class="dropdown-label">
@@ -86,26 +94,6 @@
                 
                     <div class="control-group">
                         <div class="dropdown-label">
-                            <span>Quality: Medium</span>
-                        </div>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="video-bitrate" value="low">
-                                Low
-                            </label>
-                            <label class="radio-option active">
-                                <input type="radio" name="video-bitrate" value="medium" checked>
-                                Medium
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="video-bitrate" value="high">
-                                High
-                            </label>
-                        </div>
-                    </div>
-                
-                    <div class="control-group">
-                        <div class="dropdown-label">
                             <span>FPS: 30</span>
                         </div>
                         <div class="radio-group">
@@ -130,91 +118,98 @@
                         <button id="export-video" class="disabled">Export Video</button>
                     </div>  
                 </div>
-                <div class="control-group">
-                    <label for="dot-size">Dot Size</label>
-                    <div class="slider-container">
-                        <input type="range" id="dot-size" min="1" max="20" value="8">
-                        <span class="slider-value" id="dot-size-value">8</span>
-                    </div>
-                </div>
 
-                <div class="control-group">
-                    <label for="contrast">Contrast</label>
-                    <div class="slider-container">
-                        <input type="range" id="contrast" min="0" max="200" value="100">
-                        <span class="slider-value" id="contrast-value">100%</span>
-                    </div>
+                <!-- Effect controls -->
+                <div class="panel-header">
+                    <h3>Effect Controls</h3>
                 </div>
-
-                <div class="control-group">
-                    <label>Image Mode</label>
-                    <div class="radio-group">
-                        <label class="radio-option active">
-                            <input type="radio" name="mode" value="normal" checked>
-                            Normal
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="mode" value="negative">
-                            Negative
-                        </label>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label>Pattern Color</label>
-                    <div class="color-picker-container">
-                        <div class="color-preview" id="pattern-color-preview"></div>
-                        <input type="color" id="pattern-color" value="#000000" title="Pattern Color">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label>Overlay Color</label>
-                    <div class="color-picker-container">
-                        <div class="color-preview" id="overlay-color-preview"></div>
-                        <input type="color" id="overlay-color" value="#ffffff" title="Overlay Color">
+                <div class="effect-controls">
+                    <div class="control-group">
+                        <label for="dot-size">Dot Size</label>
                         <div class="slider-container">
-                            <input type="range" id="overlay-opacity" min="0" max="100" value="0">
-                            <span class="slider-value" id="overlay-opacity-value">0%</span>
+                            <input type="range" id="dot-size" min="1" max="20" value="8">
+                            <span class="slider-value" id="dot-size-value">8</span>
                         </div>
                     </div>
-                </div>
 
-                <div class="control-group">
-                    <label>Halftone Pattern</label>
-                    <div class="radio-group">
-                        <label class="radio-option active">
-                            <input type="radio" name="pattern" value="elipse" checked>
-                            Elipse
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="pattern" value="diamond">
-                            Diamond
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="pattern" value="x">
-                            X
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="pattern" value="star">
-                            Star
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="pattern" value="crt">
-                            CRT
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="pattern" value="pixel">
-                            Pixel
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="pattern" value="letter">
-                            Letters
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="pattern" value="stochastic">
-                            Stochastic
-                        </label>
+                    <div class="control-group">
+                        <label for="contrast">Contrast</label>
+                        <div class="slider-container">
+                            <input type="range" id="contrast" min="0" max="200" value="100">
+                            <span class="slider-value" id="contrast-value">100%</span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Image Mode</label>
+                        <div class="radio-group">
+                            <label class="radio-option active">
+                                <input type="radio" name="mode" value="normal" checked>
+                                Normal
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="mode" value="negative">
+                                Negative
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Pattern Color</label>
+                        <div class="color-picker-container">
+                            <div class="color-preview" id="pattern-color-preview"></div>
+                            <input type="color" id="pattern-color" value="#000000" title="Pattern Color">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Overlay Color</label>
+                        <div class="color-picker-container">
+                            <div class="color-preview" id="overlay-color-preview"></div>
+                            <input type="color" id="overlay-color" value="#ffffff" title="Overlay Color">
+                            <div class="slider-container">
+                                <input type="range" id="overlay-opacity" min="0" max="100" value="0">
+                                <span class="slider-value" id="overlay-opacity-value">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Halftone Pattern</label>
+                        <div class="radio-group">
+                            <label class="radio-option active">
+                                <input type="radio" name="pattern" value="elipse" checked>
+                                Elipse
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="pattern" value="diamond">
+                                Diamond
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="pattern" value="x">
+                                X
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="pattern" value="star">
+                                Star
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="pattern" value="crt">
+                                CRT
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="pattern" value="pixel">
+                                Pixel
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="pattern" value="letter">
+                                Letters
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="pattern" value="stochastic">
+                                Stochastic
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -321,6 +316,41 @@
                 });
             }
         });
+
+        // Panel toggle functionality
+        document.querySelectorAll('.toggle-panel').forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target');
+                // Only allow collapsing for video-controls
+                if (targetId === 'video-controls') {
+                    const panel = document.querySelector('.' + targetId);
+                    const isCollapsed = panel.classList.toggle('collapsed');
+                    
+                    // Rotate arrow icon
+                    button.querySelector('svg').style.transform = isCollapsed ? 'rotate(-90deg)' : '';
+                    
+                    // Save state to localStorage only for video controls
+                    localStorage.setItem(targetId + '-collapsed', isCollapsed);
+                }
+            });
+        });
+
+        // Restore panel states from localStorage - only for video controls
+        const videoControlsBtn = document.querySelector('[data-target="video-controls"]');
+        if (videoControlsBtn) {
+            const isCollapsed = localStorage.getItem('video-controls-collapsed') === 'true';
+            if (isCollapsed) {
+                const panel = document.querySelector('.video-controls');
+                panel.classList.add('collapsed');
+                videoControlsBtn.querySelector('svg').style.transform = 'rotate(-90deg)';
+            }
+        }
+
+        // Remove toggle button from effect controls
+        const effectToggleBtn = document.querySelector('[data-target="effect-controls"]');
+        if (effectToggleBtn) {
+            effectToggleBtn.remove();
+        }
     </script>
 </body>
 </html>

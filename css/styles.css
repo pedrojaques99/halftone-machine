@@ -50,6 +50,11 @@ h1 {
     font-size: 20px;
 }
 
+h3 {
+    font-weight: 200;
+    font-size: 8px;
+}
+
 .logo {
     color: var(--accent);
     margin-right: 10px;
@@ -162,7 +167,8 @@ main {
 .control-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .control-group label {
@@ -264,7 +270,8 @@ button:active {
     position: relative;
     display: flex;
     gap: 8px;
-    margin-top: 16px;
+    margin-top: 0px;
+    z-index: 10;
 }
 
 .export-options button {
@@ -424,8 +431,10 @@ input[type="color"] {
     display: none;
     border-radius: 6px;
     padding: 5px;
-    margin-top: 5px;
-    margin-bottom: -30px;
+    margin-top: -20px;
+    margin-bottom: -20px;
+    position: relative;
+    z-index: 20;
 }
 
 .video-controls.show {
@@ -439,14 +448,19 @@ input[type="color"] {
 
 .video-controls .control-group {
     position: relative;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
+    z-index: 1;
+}
+
+.video-controls .control-group.open {
+    z-index: 30;
 }
 
 .video-controls .dropdown-label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 10px;
+    padding: 10px 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 4px;
     cursor: pointer;
@@ -454,6 +468,7 @@ input[type="color"] {
     color: var(--text);
     transition: all 0.2s;
     user-select: none;
+    background: var(--bg-dark);
 }
 
 .video-controls .dropdown-label:after {
@@ -480,8 +495,8 @@ input[type="color"] {
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.2s;
-    z-index: 100;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 31;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .video-controls .control-group.open .radio-group {
@@ -527,7 +542,7 @@ input[type="color"] {
     border: none;
     border-radius: 6px;
     padding: 8px 16px;
-    margin-top: 12px;
+    margin-top: 10px;
     width: 100%;
     font-size: 12px;
     cursor: pointer;
@@ -541,4 +556,84 @@ input[type="color"] {
 
 .start-export-btn:active {
     transform: translateY(0);
+}
+
+/* Panel Header Styles */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    padding: 8px 8px 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.panel-header h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: grey;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.toggle-panel {
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    position: absolute;
+    right: 0;
+    top: 0%;
+    transform: translateY(-20%);
+}
+
+.toggle-panel:hover {
+    opacity: 0.8;
+    color: var(--accent);
+}
+
+.toggle-panel:hover svg {
+    transform: translateX(-2px);
+}
+
+.toggle-panel svg {
+    transition: all 0.2s ease;
+    display: flex;
+    transform: translateX(0);
+}
+
+.toggle-panel.collapsed svg {
+    transform: rotate(-90deg);
+}
+
+.toggle-panel.collapsed:hover svg {
+    transform: rotate(-90deg) translateY(-2px);
+}
+
+/* Panel Content Transitions */
+.video-controls,
+.effect-controls {
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    max-height: 1000px;
+    opacity: 1;
+    overflow: visible;
+}
+
+.video-controls.collapsed,
+.effect-controls.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    margin-top: -30px;
+    pointer-events: none;
 }
