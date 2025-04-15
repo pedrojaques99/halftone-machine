@@ -9,9 +9,10 @@ class VideoProcessor {
         this.video.loop = true;
         
         // Frame processing
-        this.frameCallback = null;
+        this.animationFrame = null;
         this.isProcessing = false;
-        this.lastFrameTime = 0;
+        this.frameBuffer = document.createElement('canvas');
+        this.frameBufferCtx = this.frameBuffer.getContext('2d', { willReadFrequently: true });
         
         // Export settings
         this.exportSettings = {
@@ -39,7 +40,7 @@ class VideoProcessor {
         };
 
         // Bind methods
-        this._processFrame = this._processFrame.bind(this);
+        this.renderLoop = this.renderLoop.bind(this);
         
         // Add video event listeners
         this.video.addEventListener('play', () => {
@@ -50,12 +51,17 @@ class VideoProcessor {
             this.stop();
         });
 
-        // Add canvas event listeners
+        // Add canvas event listeners with passive: false
         this.canvas.addEventListener('click', (e) => {
-            // Prevent default to avoid any browser handling
             e.preventDefault();
             e.stopPropagation();
         }, { passive: false });
+
+        // Prevent default touch actions
+        this.canvas.style.touchAction = 'none';
+        this.canvas.style.userSelect = 'none';
+        this.canvas.style.webkitUserSelect = 'none';
+        this.canvas.style.webkitTouchCallout = 'none';
     }
     
     start() {
@@ -68,20 +74,17 @@ class VideoProcessor {
         
         this.canvas.width = targetWidth;
         this.canvas.height = targetHeight;
-        
-        // Set canvas style to prevent any browser default handling
-        this.canvas.style.touchAction = 'none';
-        this.canvas.style.userSelect = 'none';
-        this.canvas.style.webkitUserSelect = 'none';
+        this.frameBuffer.width = targetWidth;
+        this.frameBuffer.height = targetHeight;
         
         this.isProcessing = true;
-        this._processFrame();
+        this.renderLoop();
     }
     
     stop() {
-        if (this.frameCallback) {
-            this.video.cancelVideoFrameCallback(this.frameCallback);
-            this.frameCallback = null;
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+            this.animationFrame = null;
         }
         this.isProcessing = false;
         
@@ -90,33 +93,25 @@ class VideoProcessor {
         }
     }
     
-    _processFrame() {
+    renderLoop() {
         if (!this.isProcessing || this.video.paused || this.video.ended) {
             return;
         }
 
-        const currentTime = performance.now();
-        const timeSinceLastFrame = currentTime - this.lastFrameTime;
+        // Clear the frame buffer
+        this.frameBufferCtx.clearRect(0, 0, this.frameBuffer.width, this.frameBuffer.height);
         
-        // Only process if enough time has passed (helps prevent flickering)
-        if (timeSinceLastFrame < 16) { // ~60fps
-            this.frameCallback = this.video.requestVideoFrameCallback(this._processFrame);
-            return;
-        }
-
-        // Clear the canvas with a single operation
+        // Draw the video frame to the buffer
+        this.frameBufferCtx.drawImage(this.video, 0, 0, this.frameBuffer.width, this.frameBuffer.height);
+        
+        // Clear the main canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw the video frame
-        this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+        // Process with halftone effect using the buffer
+        this.halftoneEffect.process(this.frameBuffer);
         
-        // Process with halftone effect
-        this.halftoneEffect.process(this.video);
-        
-        this.lastFrameTime = currentTime;
-        
-        // Request next frame using video frame callback
-        this.frameCallback = this.video.requestVideoFrameCallback(this._processFrame);
+        // Request next frame
+        this.animationFrame = requestAnimationFrame(this.renderLoop);
     }
 
     updateSettings(newSettings) {

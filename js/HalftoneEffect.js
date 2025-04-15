@@ -114,49 +114,34 @@ class HalftoneEffect {
         // Calculate pattern spacing
         const spacing = this.getPatternSpacing();
         
-        // Calculate grid alignment to ensure patterns line up
+        // Calculate grid alignment
         const startX = spacing / 2;
         const startY = spacing / 2;
         const cols = Math.ceil(this.canvas.width / spacing);
         const rows = Math.ceil(this.canvas.height / spacing);
         
-        // Process the entire image in a grid-aligned pattern
+        // Process the entire grid synchronously
         this._processGrid(rows, cols, startX, startY, spacing, data);
     }
 
     _processGrid(rows, cols, startX, startY, spacing, data) {
-        // Process in chunks for better performance
-        const CHUNK_SIZE = 50;
-        let currentRow = 0;
-
-        const processChunk = () => {
-            const endRow = Math.min(currentRow + CHUNK_SIZE, rows);
-            
-            for (let row = currentRow; row < endRow; row++) {
-                for (let col = 0; col < cols; col++) {
-                    const x = startX + col * spacing;
-                    const y = startY + row * spacing;
-                    
-                    // Sample and draw pattern
-                    const brightness = this.sampleArea(x - spacing/2, y - spacing/2, spacing, data);
-                    const adjustedBrightness = this.adjustContrast(brightness);
-                    const size = this.settings.dotSize * 
-                        (this.settings.negative ? adjustedBrightness : (255 - adjustedBrightness)) / 255;
-                    
-                    if (size > 0.5 || this.settings.pattern === 'line') {
-                        this._drawPattern(x, y, size);
-                    }
+        // Process entire grid in one pass
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const x = startX + col * spacing;
+                const y = startY + row * spacing;
+                
+                // Sample and draw pattern
+                const brightness = this.sampleArea(x - spacing/2, y - spacing/2, spacing, data);
+                const adjustedBrightness = this.adjustContrast(brightness);
+                const size = this.settings.dotSize * 
+                    (this.settings.negative ? adjustedBrightness : (255 - adjustedBrightness)) / 255;
+                
+                if (size > 0.5 || this.settings.pattern === 'line') {
+                    this._drawPattern(x, y, size);
                 }
             }
-
-            currentRow = endRow;
-            
-            if (currentRow < rows) {
-                requestAnimationFrame(processChunk);
-            }
-        };
-
-        requestAnimationFrame(processChunk);
+        }
     }
 
     _drawPattern(x, y, size) {
