@@ -37,107 +37,95 @@
             </div>
 
             <div class="control-panel">
-                <div class="panel-header">
-                    <h3>Export Config</h3> 
-                    <button class="toggle-panel" data-target="video-controls">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="video-controls">
-                    <div class="control-group">
-                        <div class="dropdown-label"><span>Format: MP4 (H264)</span></div>
-                        <div class="radio-group">
-                            <label class="radio-option"><input type="radio" name="video-format" value="webm">WebM (VP9)</label>
-                            <label class="radio-option active"><input type="radio" name="video-format" value="mp4" checked>MP4 (H264)</label>
-                        </div>
+                <div class="panel-section">
+                    <div class="panel-header">
+                        <h3>Export Config</h3>
+                        <button class="toggle-panel" data-target="video-controls">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
                     </div>
-                
-                    <div class="control-group">
-                        <div class="dropdown-label"><span>Resolution: 720p</span></div>
-                        <div class="radio-group">
-                            <label class="radio-option"><input type="radio" name="video-quality" value="low">480p</label>
-                            <label class="radio-option active"><input type="radio" name="video-quality" value="medium" checked>720p</label>
-                            <label class="radio-option"><input type="radio" name="video-quality" value="high">1080p</label>
+                    <div class="video-controls">
+                        <div class="control-group">
+                            <div class="dropdown-label"><span>Format: MP4 (H264)</span></div>
+                            <div class="radio-group">
+                                <label class="radio-option"><input type="radio" name="video-format" value="webm">WebM (VP9)</label>
+                                <label class="radio-option active"><input type="radio" name="video-format" value="mp4" checked>MP4 (H264)</label>
+                            </div>
                         </div>
-                    </div>
-                
-                    <div class="control-group">
-                        <div class="dropdown-label"><span>FPS: 30</span></div>
-                        <div class="radio-group">
-                            <label class="radio-option"><input type="radio" name="video-fps" value="24">24</label>
-                            <label class="radio-option active"><input type="radio" name="video-fps" value="30" checked>30</label>
-                            <label class="radio-option"><input type="radio" name="video-fps" value="60">60</label>
+                    
+                        <div class="control-group">
+                            <div class="dropdown-label"><span>Resolution: 720p</span></div>
+                            <div class="radio-group">
+                                <label class="radio-option"><input type="radio" name="video-quality" value="low">480p</label>
+                                <label class="radio-option active"><input type="radio" name="video-quality" value="medium" checked>720p</label>
+                                <label class="radio-option"><input type="radio" name="video-quality" value="high">1080p</label>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="export-options">
-                        <button id="export-image" class="disabled">Export Image</button>
-                        <button id="export-video" class="disabled">Export Video</button>
-                    </div>  
-                </div>
-
-                <div class="panel-header">
-                    <h3>Effect Controls</h3>
-                </div>
-                <div class="effect-controls">
-                    <div class="control-group">
-                        <label for="dot-size">Dot Size</label>
-                        <div class="slider-container">
-                            <input type="range" id="dot-size" min="1" max="20" value="8">
-                            <span class="slider-value" id="dot-size-value">8</span>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label for="contrast">Contrast</label>
-                        <div class="slider-container">
-                            <input type="range" id="contrast" min="0" max="200" value="100">
-                            <span class="slider-value" id="contrast-value">100%</span>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label>Image Mode</label>
-                        <div class="radio-group">
-                            <label class="radio-option active"><input type="radio" name="mode" value="normal" checked>Normal</label>
-                            <label class="radio-option"><input type="radio" name="mode" value="negative">Negative</label>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label>Pattern Color</label>
-                        <div class="color-picker-container">
-                            <div class="color-preview" id="pattern-color-preview"></div>
-                            <input type="color" id="pattern-color" value="#000000" title="Pattern Color">
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label>Overlay Color</label>
-                        <div class="color-picker-container">
-                            <div class="color-preview" id="overlay-color-preview"></div>
-                            <input type="color" id="overlay-color" value="#ffffff" title="Overlay Color">
-                            <div class="slider-container">
-                                <input type="range" id="overlay-opacity" min="0" max="100" value="0">
-                                <span class="slider-value" id="overlay-opacity-value">0%</span>
+                    
+                        <div class="control-group">
+                            <div class="dropdown-label"><span>FPS: 30</span></div>
+                            <div class="radio-group">
+                                <label class="radio-option"><input type="radio" name="video-fps" value="24">24</label>
+                                <label class="radio-option active"><input type="radio" name="video-fps" value="30" checked>30</label>
+                                <label class="radio-option"><input type="radio" name="video-fps" value="60">60</label>
                             </div>
                         </div>
                     </div>
-
                     <div class="control-group">
-                        <label>Halftone Pattern</label>
-                        <div class="radio-group">
-                            <label class="radio-option active"><input type="radio" name="pattern" value="elipse" checked>Elipse</label>
-                            <label class="radio-option"><input type="radio" name="pattern" value="diamond">Diamond</label>
-                            <label class="radio-option"><input type="radio" name="pattern" value="x">X</label>
-                            <label class="radio-option"><input type="radio" name="pattern" value="star">Star</label>
-                            <label class="radio-option"><input type="radio" name="pattern" value="crt">CRT</label>
-                            <label class="radio-option"><input type="radio" name="pattern" value="pixel">Pixel</label>
-                            <label class="radio-option"><input type="radio" name="pattern" value="letter">Letters</label>
-                            <label class="radio-option"><input type="radio" name="pattern" value="stochastic">Stochastic</label>
+                        <div class="export-options">
+                            <button id="export-image" class="disabled">Export Image</button>
+                            <button id="export-video" class="disabled">Export Video</button>
+                        </div>  
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <div class="panel-header">
+                    <div class="effect-controls">
+                        <div class="control-group slider-control">
+                            <label for="dot-size">Dot Size</label>
+                            <div class="slider-container">
+                                <input type="range" id="dot-size" min="1" max="20" value="8" step="1">
+                                <span class="slider-value" id="dot-size-value">8</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group slider-control">
+                            <label for="contrast">Contrast</label>
+                            <div class="slider-container">
+                                <input type="range" id="contrast" min="1" max="200" value="100" step="1">
+                                <span class="slider-value" id="contrast-value">100%</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group color-control">
+                            <div class="color-pickers-row">
+                                <div class="color-picker-group">
+                                    <div class="color-preview" id="pattern-color-preview"></div>
+                                    <input type="color" id="pattern-color" value="#000000" title="Pattern Color">
+                                    <label>Pattern</label>
+                                </div>
+                                <div class="color-picker-group">
+                                    <div class="color-preview" id="overlay-color-preview"></div>
+                                    <input type="color" id="overlay-color" value="#ffffff" title="Background Color">
+                                    <label>Background</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control-group pattern-control">
+                            <div class="radio-group">
+                                <label class="radio-option active"><input type="radio" name="pattern" value="elipse" checked>Elipse</label>
+                                <label class="radio-option"><input type="radio" name="pattern" value="diamond">Diamond</label>
+                                <label class="radio-option"><input type="radio" name="pattern" value="x">X</label>
+                                <label class="radio-option"><input type="radio" name="pattern" value="star">Star</label>
+                                <label class="radio-option"><input type="radio" name="pattern" value="crt">CRT</label>
+                                <label class="radio-option"><input type="radio" name="pattern" value="pixel">Pixel</label>
+                                <label class="radio-option"><input type="radio" name="pattern" value="letter">Letters</label>
+                                <label class="radio-option"><input type="radio" name="pattern" value="stochastic">Stochastic</label>
+                            </div>
                         </div>
                     </div>
                 </div>

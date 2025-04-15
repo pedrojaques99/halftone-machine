@@ -40,7 +40,7 @@ class HalftoneProcessor {
     }
 
     updateSettings(newSettings) {
-        this.settings = { ...this.settings, ...newSettings };
+        this.settings = { ...this.settings, ...newSettings, negative: false };
         this.effect.updateSettings(this.settings);
     }
 }
@@ -65,12 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
         dotSize: document.getElementById('dot-size'),
         contrast: document.getElementById('contrast'),
         patterns: document.querySelectorAll('input[name="pattern"]'),
-        modes: document.querySelectorAll('input[name="mode"]'),
         patternColor: document.getElementById('pattern-color'),
         patternColorPreview: document.getElementById('pattern-color-preview'),
         overlayColor: document.getElementById('overlay-color'),
         overlayColorPreview: document.getElementById('overlay-color-preview'),
-        overlayOpacity: document.getElementById('overlay-opacity'),
         videoFormat: document.querySelectorAll('input[name="video-format"]'),
         videoQuality: document.querySelectorAll('input[name="video-quality"]'),
         videoFps: document.querySelectorAll('input[name="video-fps"]'),
@@ -231,32 +229,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    controls.modes.forEach(mode => {
-        mode.addEventListener('change', (e) => {
-            const parentLabel = e.target.closest('.radio-option');
-            document.querySelectorAll('input[name="mode"]').forEach(input => {
-                input.closest('.radio-option').classList.remove('active');
-            });
-            parentLabel.classList.add('active');
-            const isNegative = e.target.value === 'negative';
-            processor.updateSettings({ negative: isNegative });
-            
-            if (currentFile && currentFile.type.startsWith('image/')) {
-                processor.processImage(currentFile);
-            }
-            
-            if (activeVideoProcessor) {
-                activeVideoProcessor.updateSettings({ negative: isNegative });
-            }
-        });
-    });
-
     controls.patternColor.addEventListener('input', updateColors);
     controls.patternColorPreview.addEventListener('click', () => controls.patternColor.click());
 
     controls.overlayColor.addEventListener('input', updateOverlay);
     controls.overlayColorPreview.addEventListener('click', () => controls.overlayColor.click());
-    controls.overlayOpacity.addEventListener('input', updateOverlay);
 
     // Video format controls
     controls.videoFormat.forEach(format => {
@@ -351,8 +328,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateEffect(e) {
         const setting = e.target.id.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
-        const value = parseInt(e.target.value);
-        e.target.nextElementSibling.textContent = setting === 'contrast' ? value + '%' : value;
+        let value = parseInt(e.target.value);
+        
+        // Adjust dot size to minimum of 2 while showing UI value of 1
+        if (setting === 'dotSize' && value === 1) {
+            value = 2;
+        }
+        
+        e.target.nextElementSibling.textContent = setting === 'contrast' ? value + '%' : e.target.value;
         
         processor.updateSettings({ [setting]: value });
         
@@ -365,12 +348,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    const debouncedProcessImage = debounce((processor, file) => {
+        if (file) {
+            requestAnimationFrame(() => {
+                processor.processImage(file);
+            });
+        }
+    }, 16); // Approximately 60fps
+
     function updateColors() {
         const color = controls.patternColor.value;
         controls.patternColorPreview.style.backgroundColor = color;
         processor.updateSettings({ color });
         
-        if (currentFile) processor.processImage(currentFile);
+        debouncedProcessImage(processor, currentFile);
         
         if (activeVideoProcessor) {
             activeVideoProcessor.updateSettings({ color });
@@ -378,24 +381,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateOverlay() {
-        const opacity = controls.overlayOpacity.value;
-        controls.overlayOpacity.nextElementSibling.textContent = opacity + '%';
-        
         const color = controls.overlayColor.value;
         controls.overlayColorPreview.style.backgroundColor = color;
-        controls.overlayColorPreview.style.opacity = Math.max(0.3, opacity / 100);
         
         processor.updateSettings({
-            overlayColor: color,
-            overlayOpacity: opacity
+            overlayColor: color
         });
         
-        if (currentFile) processor.processImage(currentFile);
+        debouncedProcessImage(processor, currentFile);
         
         if (activeVideoProcessor) {
             activeVideoProcessor.updateSettings({
-                overlayColor: color,
-                overlayOpacity: opacity
+                overlayColor: color
             });
         }
     }

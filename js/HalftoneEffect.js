@@ -1,7 +1,46 @@
+class ColorManager {
+    constructor() {
+        this._cache = {
+            patternColor: null,
+            overlayColor: null,
+            overlayOpacity: null
+        };
+    }
+
+    setPatternColor(color) {
+        if (this._cache.patternColor === color) return;
+        this._cache.patternColor = color;
+        return this.normalizeColor(color);
+    }
+
+    setOverlayColor(color, opacity) {
+        if (this._cache.overlayColor === color && this._cache.overlayOpacity === opacity) return;
+        this._cache.overlayColor = color;
+        this._cache.overlayOpacity = opacity;
+        return {
+            color: this.normalizeColor(color),
+            opacity: Math.min(100, Math.max(0, opacity))
+        };
+    }
+
+    normalizeColor(color) {
+        // Ensure color is in #RRGGBB format
+        if (!color.startsWith('#')) {
+            color = '#' + color;
+        }
+        if (color.length === 4) {
+            // Convert #RGB to #RRGGBB
+            color = '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+        }
+        return color;
+    }
+}
+
 class HalftoneEffect {
     constructor(canvas, ctx) {
         this.canvas = canvas;
         this.ctx = ctx;
+        this.colorManager = new ColorManager();
         this.settings = {
             dotSize: 8,
             contrast: 100,
@@ -15,30 +54,62 @@ class HalftoneEffect {
         
         // Cache for performance
         this._contrastFactor = this.calculateContrastFactor();
+        this._imageData = null;
+        this._patternBuffer = new Map();
+        this._lastProcessedSettings = null;
     }
 
     updateSettings(newSettings) {
+        const significantChange = this._hasSignificantChange(newSettings);
         this.settings = {...this.settings, ...newSettings};
+        
+        // Set negative mode to true if pattern is stochastic
+        if (newSettings.pattern === 'stochastic') {
+            this.settings.negative = true;
+        }
+        
         if ('contrast' in newSettings) {
             this._contrastFactor = this.calculateContrastFactor();
         }
+
+        // Clear pattern buffer if dot size or pattern type changes
+        if (newSettings.dotSize || newSettings.pattern) {
+            this._patternBuffer.clear();
+        }
+
+        return significantChange;
+    }
+
+    _hasSignificantChange(newSettings) {
+        // Check if the new settings would require a full reprocess
+        return newSettings.dotSize !== undefined ||
+               newSettings.pattern !== undefined ||
+               newSettings.contrast !== undefined;
     }
 
     process(img) {
         if (img) {
             this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+            this._imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
         }
         
-        const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-        const data = imageData.data;
+        if (!this._imageData) return;
         
-        // Clear canvas with background color
-        this.ctx.fillStyle = this.settings.negative ? 'black' : 'white';
+        const data = this._imageData.data;
+        
+        // Set background color based on negative mode
+        const bgColor = this.settings.negative ? 
+            this.colorManager.setPatternColor(this.settings.color) : 
+            this.colorManager.setPatternColor(this.settings.overlayColor);
+        this.ctx.fillStyle = bgColor;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Set drawing color
-        this.ctx.fillStyle = this.settings.negative ? 'white' : this.settings.color;
-        this.ctx.strokeStyle = this.ctx.fillStyle;
+        // Set pattern color based on negative mode
+        const patternColor = this.settings.negative ? 
+            this.colorManager.setPatternColor(this.settings.overlayColor) : 
+            this.colorManager.setPatternColor(this.settings.color);
+        this.ctx.fillStyle = patternColor;
+        this.ctx.strokeStyle = patternColor;
         
         // Calculate pattern spacing
         const spacing = this.getPatternSpacing();
@@ -50,26 +121,148 @@ class HalftoneEffect {
         const rows = Math.ceil(this.canvas.height / spacing);
         
         // Process the entire image in a grid-aligned pattern
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-                const x = startX + col * spacing;
-                const y = startY + row * spacing;
-                
-                // Sample and draw pattern
-                const brightness = this.sampleArea(x - spacing/2, y - spacing/2, spacing, data);
-                const adjustedBrightness = this.adjustContrast(brightness);
-                const size = this.settings.dotSize * 
-                    (this.settings.negative ? adjustedBrightness : (255 - adjustedBrightness)) / 255;
-                
-                if (size > 0.5 || this.settings.pattern === 'line') {
-                    this.drawPattern(x, y, size);
+        this._processGrid(rows, cols, startX, startY, spacing, data);
+    }
+
+    _processGrid(rows, cols, startX, startY, spacing, data) {
+        // Process in chunks for better performance
+        const CHUNK_SIZE = 50;
+        let currentRow = 0;
+
+        const processChunk = () => {
+            const endRow = Math.min(currentRow + CHUNK_SIZE, rows);
+            
+            for (let row = currentRow; row < endRow; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const x = startX + col * spacing;
+                    const y = startY + row * spacing;
+                    
+                    // Sample and draw pattern
+                    const brightness = this.sampleArea(x - spacing/2, y - spacing/2, spacing, data);
+                    const adjustedBrightness = this.adjustContrast(brightness);
+                    const size = this.settings.dotSize * 
+                        (this.settings.negative ? adjustedBrightness : (255 - adjustedBrightness)) / 255;
+                    
+                    if (size > 0.5 || this.settings.pattern === 'line') {
+                        this._drawPattern(x, y, size);
+                    }
                 }
             }
-        }
 
-        // Apply overlay if needed
-        if (this.settings.overlayOpacity > 0) {
-            this.applyOverlay();
+            currentRow = endRow;
+            
+            if (currentRow < rows) {
+                requestAnimationFrame(processChunk);
+            }
+        };
+
+        requestAnimationFrame(processChunk);
+    }
+
+    _drawPattern(x, y, size) {
+        // Set pattern color based on negative mode
+        const patternColor = this.settings.negative ? 
+            this.colorManager.setPatternColor(this.settings.overlayColor) : 
+            this.colorManager.setPatternColor(this.settings.color);
+        
+        this.ctx.fillStyle = patternColor;
+        this.ctx.strokeStyle = patternColor;
+        
+        switch (this.settings.pattern) {
+            case 'elipse':
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, size, 0, Math.PI * 2);
+                this.ctx.fill();
+                break;
+                
+            case 'diamond':
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y - size);
+                this.ctx.lineTo(x + size, y);
+                this.ctx.lineTo(x, y + size);
+                this.ctx.lineTo(x - size, y);
+                this.ctx.closePath();
+                this.ctx.fill();
+                break;
+                
+            case 'x':
+                const lineWidth = Math.max(0.5, size * 0.15);
+                this.ctx.lineWidth = lineWidth;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(x - size, y - size);
+                this.ctx.lineTo(x + size, y + size);
+                this.ctx.moveTo(x + size, y - size);
+                this.ctx.lineTo(x - size, y + size);
+                this.ctx.stroke();
+                break;
+                
+            case 'star':
+                const spikes = 4;
+                const outerRadius = size;
+                const innerRadius = size * 0.4;
+                
+                this.ctx.beginPath();
+                for (let i = 0; i < spikes * 2; i++) {
+                    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                    const angle = (i * Math.PI) / spikes;
+                    const pointX = x + Math.cos(angle) * radius;
+                    const pointY = y + Math.sin(angle) * radius;
+                    
+                    if (i === 0) {
+                        this.ctx.moveTo(pointX, pointY);
+                    } else {
+                        this.ctx.lineTo(pointX, pointY);
+                    }
+                }
+                this.ctx.closePath();
+                this.ctx.fill();
+                break;
+                
+            case 'letter':
+                if (size > 2) {
+                    const chars = 'ABC1023456789!@#%&WM8BOSo=+i-.:`';
+                    const index = Math.floor((chars.length - 1) * (size / this.settings.dotSize));
+                    this.ctx.font = `${size * 2}px monospace`;
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(chars[index], x, y);
+                }
+                break;
+            
+            case 'stochastic':
+                const dotCount = Math.floor(size * 3);
+                const radius = Math.max(0.5, this.settings.dotSize * 0.2);
+                
+                for (let i = 0; i < dotCount; i++) {
+                    const offsetX = (Math.random() - 0.5) * this.settings.dotSize * 2;
+                    const offsetY = (Math.random() - 0.5) * this.settings.dotSize * 2;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(x + offsetX, y + offsetY, radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                break;
+            
+            case 'pixel':
+                const pixelSize = Math.max(1, size);
+                this.ctx.fillRect(
+                    x - pixelSize/2,
+                    y - pixelSize/2,
+                    pixelSize,
+                    pixelSize
+                );
+                break;
+
+            case 'crt':
+                const color = this.hexToRgb(this.settings.color);
+                const opacity = size / this.settings.dotSize;
+                
+                this.ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, size * 0.4, 0, Math.PI * 2);
+                this.ctx.fill();
+                break;
         }
     }
 
@@ -123,6 +316,13 @@ class HalftoneEffect {
     }
 
     drawPattern(x, y, size) {
+        const color = this.colorManager.setPatternColor(
+            this.settings.negative ? 'white' : this.settings.color
+        );
+        
+        this.ctx.fillStyle = color;
+        this.ctx.strokeStyle = color;
+        
         switch (this.settings.pattern) {
             case 'elipse':
             case 'diamond':
@@ -131,9 +331,6 @@ class HalftoneEffect {
             case 'pixel':
             case 'letter':
             case 'stochastic':
-                this.ctx.fillStyle = this.settings.negative ? 
-                    'white' : this.settings.color;
-                this.ctx.strokeStyle = this.ctx.fillStyle;
                 break;
                 
             case 'crt':
@@ -260,26 +457,5 @@ class HalftoneEffect {
             g: parseInt(result[2], 16),
             b: parseInt(result[3], 16)
         } : { r: 0, g: 0, b: 0 };
-    }
-
-    applyOverlay() {
-        const opacity = this.settings.overlayOpacity / 100;
-        this.ctx.save();
-        
-        // Use multiply blend mode
-        this.ctx.globalCompositeOperation = 'multiply';
-        this.ctx.globalAlpha = opacity;
-        this.ctx.fillStyle = this.settings.overlayColor;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Add a white layer with screen blend mode to handle brightness
-        if (opacity > 0) {
-            this.ctx.globalCompositeOperation = 'screen';
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.globalAlpha = 1 - opacity;
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        }
-        
-        this.ctx.restore();
     }
 } 
