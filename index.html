@@ -34,15 +34,23 @@
             <div class="preview-area">
                 <canvas id="preview-canvas"></canvas>
                 <div class="loading-indicator">Processing...</div>
-                <div class="tutorial-overlay">
+                <div class="tutorial-overlay" id="upload-tutorial">
                     <div class="tutorial-content">
-                        <h3>How to use:</h3>
-                        <ol>
-                            <li>Upload an image or video</li>
-                            <li>Control halftone pattern effect</li>
-                            <li>Choose colors</li>
-                            <li>Export as image or video</li>
-                        </ol>
+                        <div class="upload-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                            </svg>
+                        </div>
+                        <h3>Drop media here or click to upload</h3>
+                        <div class="tutorial-steps">
+                            <ol>
+                                <li>Upload an image or video</li>
+                                <li>Control halftone pattern effect</li>
+                                <li>Choose colors</li>
+                                <li>Export as image or video</li>
+                            </ol>
+                        </div>
+                        <input type="file" id="tutorial-file-input" accept="video/*,image/*">
                     </div>
                 </div>
             </div>
@@ -55,7 +63,12 @@
                     <div class="control-group">
                         <div class="export-options">
                             <button id="export-image" class="disabled">Export Image</button>
-                            <button id="export-video" class="disabled">Export Video</button>
+                            <button id="export-video" class="disabled">
+                                Export Video
+                                <svg class="collapse-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                     
