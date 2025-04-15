@@ -1,7 +1,7 @@
 :root {
     --accent: #bfff38;
     --bg-dark: #191919;
-    --bg-light: #1e1e1e;
+    --bg-light: #151515;
     --text: #ffffff;
 }
 
@@ -172,19 +172,23 @@ main {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    height: fit-content;
+    overflow-y: auto;
+    max-height: calc(100vh - 100px);
 }
 
 .panel-section {
     background-color: var(--bg-dark);
     border-radius: 8px;
     padding: 16px;
+    width: 100%;
 }
 
 .panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -214,11 +218,16 @@ main {
     opacity: 0.9;
 }
 
+.slider-control {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
 .slider-control .slider-container {
+    width: 100%;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 4px 0;
 }
 
 .slider-control input[type="range"] {
@@ -255,13 +264,14 @@ main {
 }
 
 .color-control {
-    padding: 24px;
+    padding: 16px;
 }
 
 .color-pickers-row {
-    display: flex;
-    justify-content: center;
-    gap: 64px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
 }
 
 .color-picker-group {
@@ -306,124 +316,66 @@ input[type="color"] {
 
 /* Video controls styling - OS Style Dropdown */
 .video-controls {
-    display: none;
-    border-radius: 6px;
-    padding: 5px;
-    margin-top: -20px;
-    margin-bottom: -20px;
-    position: relative;
-    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.video-controls.show {
-    display: block;
-}
-
-.video-controls .dropdown-label {
-    margin-bottom: 2px;
-    font-weight: 30;
+.video-controls h4 {
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 8px;
+    opacity: 0.8;
 }
 
 .video-controls .control-group {
-    position: relative;
-    margin-bottom: 4px;
-    z-index: 1;
+    background: var(--bg-dark);
+    border-radius: 8px;
+    padding: 12px;
 }
 
-.video-controls .control-group.open {
-    z-index: 30;
-}
-
-.video-controls .dropdown-label {
+.video-controls .radio-group.simple {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.video-controls .radio-group.simple .radio-option {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 12px;
+    background: var(--bg-light);
+    border: 1px solid transparent;
     border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
     cursor: pointer;
-    font-size: 10px;
-    color: var(--text);
     transition: all 0.2s;
-    user-select: none;
-    background: var(--bg-dark);
-}
-
-.video-controls .dropdown-label:after {
-    content: '▼';
-    font-size: 8px;
-    opacity: 0.5;
-    transform: translateY(1px);
-}
-
-.video-controls .dropdown-label:hover {
-    background: var(--bg-light);
-}
-
-.video-controls .radio-group {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    margin-top: -1px;
-    background: var(--bg-dark);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.2s;
-    z-index: 31;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-.video-controls .control-group.open .radio-group {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.video-controls .control-group.open .dropdown-label:after {
-    transform: translateY(1px) rotate(180deg);
-}
-
-.video-controls .radio-option {
-    padding: 6px 10px;
-    border: none;
-    font-size: 10px;
-    text-align: left;
-    background: transparent;
-    color: var(--text);
     opacity: 0.8;
-    width: 100%;
-    min-width: 100%;
-    border-radius: 0;
 }
 
-.video-controls .radio-option:hover {
+.video-controls .radio-group.simple .radio-option:hover {
+    opacity: 1;
+    border-color: var(--accent);
+}
+
+.video-controls .radio-group.simple .radio-option.active {
     background: var(--bg-light);
+    color: var(--bg-dark);
     opacity: 1;
-}
-
-.video-controls .radio-option.active {
-    color: var(--accent);
-    opacity: 1;
-}
-
-.video-controls .radio-option:not(:last-child) {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .start-export-btn {
-    background-color: var(--accent);
+    width: 100%;
+    background: var(--accent);
     color: var(--bg-dark);
     border: none;
     border-radius: 6px;
-    padding: 8px 16px;
-    margin-top: 10px;
-    width: 100%;
+    padding: 12px;
     font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
+    margin-top: 8px;
     transition: all 0.2s;
 }
 
@@ -432,8 +384,15 @@ input[type="color"] {
     transform: translateY(-1px);
 }
 
-.start-export-btn:active {
-    transform: translateY(0);
+.start-export-btn.recording {
+    background-color: #ff3838;
+    animation: pulse 1.5s infinite;
+}
+
+.start-export-btn.recording::before {
+    content: '⚫ ';
+    color: var(--bg-dark);
+    animation: pulse 1s infinite;
 }
 
 /* Panel Header Styles */
@@ -500,10 +459,12 @@ input[type="color"] {
 /* Panel Content Transitions */
 .video-controls,
 .effect-controls {
-    transition: max-height 0.3s ease, opacity 0.2s ease;
+    transition: all 0.3s ease;
     max-height: 1000px;
     opacity: 1;
     overflow: visible;
+    width: 100%;
+    padding: 8px 0;
 }
 
 .video-controls.collapsed,
@@ -512,8 +473,8 @@ input[type="color"] {
     opacity: 0;
     margin: 0;
     padding: 0;
-    margin-top: -30px;
     pointer-events: none;
+    width: 100%;
 }
 
 /* Hide default radio button */
@@ -525,6 +486,41 @@ input[type="radio"] {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+    width: 100%;
+}
+
+/* Simplified radio options for better UX */
+.pattern-control .radio-group label {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+    padding: 8px 12px;
+    background: var(--bg-dark);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.pattern-control .radio-group label:hover {
+    border-color: var(--accent);
+    background: rgba(191, 255, 56, 0.05);
+}
+
+.pattern-control .radio-group label.active {
+    background: var(--accent);
+    color: var(--bg-dark);
+}
+
+@media (max-width: 480px) {
+    .pattern-control .radio-group {
+        flex-direction: column;
+    }
+    
+    .pattern-control .radio-group label {
+        width: 100%;
+    }
 }
 
 .radio-option {
@@ -547,7 +543,6 @@ input[type="radio"] {
 
 .radio-option.active {
     border-color: var(--accent);
-    background-color: rgba(191, 255, 56, 0.1);
     color: var(--accent);
 }
 
@@ -556,17 +551,19 @@ input[type="radio"] {
 }
 
 .export-options {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+    width: 100%;
+    margin-bottom: 16px;
 }
 
 .export-options button {
-    flex: 1;
     background-color: var(--accent);
     color: var(--bg-dark);
     border: none;
     border-radius: 6px;
-    padding: 10px;
+    padding: 12px;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -575,7 +572,7 @@ input[type="radio"] {
 
 .export-options button:hover:not(.disabled) {
     opacity: 0.9;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .export-options button.disabled {
@@ -583,13 +580,110 @@ input[type="radio"] {
     cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
-    .control-panel {
-        max-width: 100%;
+.video-export-config {
+    display: none;
+    margin-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 16px;
+}
+
+.video-export-config.show {
+    display: block;
+}
+
+.video-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.video-controls h4 {
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 8px;
+    opacity: 0.8;
+}
+
+.video-controls .control-group {
+    background: var(--bg-dark);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.video-controls .radio-group.simple {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.video-controls .radio-group.simple .radio-option {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 12px;
+    background: var(--bg-light);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.8;
+}
+
+.video-controls .radio-group.simple .radio-option:hover {
+    opacity: 1;
+    border-color: var(--accent);
+}
+
+.video-controls .radio-group.simple .radio-option.active {
+    background: var(--bg-dark);
+    color: var(--accent);
+    opacity: 1;
+    border: 1px solid var(--accent);
+}
+
+.start-export-btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg-dark);
+    border: none;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+}
+
+.start-export-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.start-export-btn.recording {
+    background-color: #ff3838;
+    animation: pulse 1.5s infinite;
+}
+
+.start-export-btn.recording::before {
+    content: '⚫ ';
+    color: var(--bg-dark);
+    animation: pulse 1s infinite;
+}
+
+@media (max-width: 480px) {
+    .export-options {
+        grid-template-columns: 1fr;
     }
 
-    .pattern-control .radio-group {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    .video-controls .radio-group.simple {
+        flex-direction: column;
+    }
+
+    .video-controls .radio-group.simple .radio-option {
+        width: 100%;
+        min-width: 100%;
     }
 }
 
@@ -646,4 +740,73 @@ button.recording::before {
     stroke: currentColor;
     stroke-width: 2;
     fill: none;
+}
+
+.tutorial-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-light);
+    z-index: 10;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.tutorial-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tutorial-content {
+    padding: 24px 32px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 300px;
+}
+
+.tutorial-content h3 {
+    color: var(--accent);
+    font-size: 16px;
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.tutorial-content ol {
+    list-style-position: inside;
+    color: var(--text);
+}
+
+.tutorial-content li {
+    margin: 12px 0;
+    font-size: 14px;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+/* Ensure scrollable areas have smooth scrolling */
+.control-panel,
+.video-config-modal {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--bg-dark);
+}
+
+.control-panel::-webkit-scrollbar,
+.video-config-modal::-webkit-scrollbar {
+    width: 6px;
+}
+
+.control-panel::-webkit-scrollbar-track,
+.video-config-modal::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+.control-panel::-webkit-scrollbar-thumb,
+.video-config-modal::-webkit-scrollbar-thumb {
+    background-color: var(--accent);
+    border-radius: 3px;
 }

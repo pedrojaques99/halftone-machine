@@ -34,56 +34,73 @@
             <div class="preview-area">
                 <canvas id="preview-canvas"></canvas>
                 <div class="loading-indicator">Processing...</div>
+                <div class="tutorial-overlay">
+                    <div class="tutorial-content">
+                        <h3>How to use:</h3>
+                        <ol>
+                            <li>Upload an image or video</li>
+                            <li>Control halftone pattern effect</li>
+                            <li>Choose colors</li>
+                            <li>Export as image or video</li>
+                        </ol>
+                    </div>
+                </div>
             </div>
 
             <div class="control-panel">
                 <div class="panel-section">
                     <div class="panel-header">
-                        <h3>Export Config</h3>
-                        <button class="toggle-panel" data-target="video-controls">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="video-controls">
-                        <div class="control-group">
-                            <div class="dropdown-label"><span>Format: MP4 (H264)</span></div>
-                            <div class="radio-group">
-                                <label class="radio-option"><input type="radio" name="video-format" value="webm">WebM (VP9)</label>
-                                <label class="radio-option active"><input type="radio" name="video-format" value="mp4" checked>MP4 (H264)</label>
-                            </div>
-                        </div>
-                    
-                        <div class="control-group">
-                            <div class="dropdown-label"><span>Resolution: 720p</span></div>
-                            <div class="radio-group">
-                                <label class="radio-option"><input type="radio" name="video-quality" value="low">480p</label>
-                                <label class="radio-option active"><input type="radio" name="video-quality" value="medium" checked>720p</label>
-                                <label class="radio-option"><input type="radio" name="video-quality" value="high">1080p</label>
-                            </div>
-                        </div>
-                    
-                        <div class="control-group">
-                            <div class="dropdown-label"><span>FPS: 30</span></div>
-                            <div class="radio-group">
-                                <label class="radio-option"><input type="radio" name="video-fps" value="24">24</label>
-                                <label class="radio-option active"><input type="radio" name="video-fps" value="30" checked>30</label>
-                                <label class="radio-option"><input type="radio" name="video-fps" value="60">60</label>
-                            </div>
-                        </div>
+                        <h3>Export</h3>
                     </div>
                     <div class="control-group">
                         <div class="export-options">
                             <button id="export-image" class="disabled">Export Image</button>
                             <button id="export-video" class="disabled">Export Video</button>
-                        </div>  
+                        </div>
+                    </div>
+                    
+                    <div class="video-export-config">
+                        <div class="video-controls">
+                            <div class="control-group">
+                                <h4>Format</h4>
+                                <div class="radio-group simple">
+                                    <label class="radio-option"><input type="radio" name="video-format" value="webm">WebM (VP9)</label>
+                                    <label class="radio-option active"><input type="radio" name="video-format" value="mp4" checked>MP4 (H264)</label>
+                                </div>
+                            </div>
+                        
+                            <div class="control-group">
+                                <h4>Resolution</h4>
+                                <div class="radio-group simple">
+                                    <label class="radio-option"><input type="radio" name="video-quality" value="low">480p</label>
+                                    <label class="radio-option active"><input type="radio" name="video-quality" value="medium" checked>720p</label>
+                                    <label class="radio-option"><input type="radio" name="video-quality" value="high">1080p</label>
+                                </div>
+                            </div>
+                        
+                            <div class="control-group">
+                                <h4>FPS</h4>
+                                <div class="radio-group simple">
+                                    <label class="radio-option"><input type="radio" name="video-fps" value="24">24</label>
+                                    <label class="radio-option active"><input type="radio" name="video-fps" value="30" checked>30</label>
+                                    <label class="radio-option"><input type="radio" name="video-fps" value="60">60</label>
+                                </div>
+                            </div>
+                            <button class="start-export-btn">Start Recording</button>
+                        </div>
                     </div>
                 </div>
 
                 <div class="panel-section">
-                    <div class="panel-header">
-                    <div class="effect-controls">
+                    <div class="panel-header margin-bottom-20">
+                        <h3>Effect Controls</h3>
+                        <button class="toggle-panel" data-target="effect-controls">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="effect-controls margin-bottom-20">
                         <div class="control-group slider-control">
                             <label for="dot-size">Dot Size</label>
                             <div class="slider-container">

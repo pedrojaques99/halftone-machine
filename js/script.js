@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportVideoBtn = document.getElementById('export-video');
     const loadingIndicator = document.querySelector('.loading-indicator');
     const videoControls = document.querySelector('.video-controls');
+    const tutorialOverlay = document.querySelector('.tutorial-overlay');
     
     let currentFile = null;
     let activeVideoProcessor = null;
@@ -123,9 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingIndicator.style.display = 'block';
         currentFile = file;
         
+        // Hide tutorial when file is loaded
+        tutorialOverlay.classList.add('hidden');
+        
         // Hide video controls initially
-        videoControls.classList.remove('show');
-        exportVideoBtn.classList.remove('active');
+        document.querySelector('.video-export-config').classList.remove('show');
         
         if (file.type.startsWith('image/')) {
             processor.processImage(file).then(() => {
@@ -135,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }).catch(error => {
                 console.error('Error processing image:', error);
                 loadingIndicator.style.display = 'none';
+                tutorialOverlay.classList.remove('hidden');
             });
         } else if (file.type.startsWith('video/')) {
             const video = document.createElement('video');
@@ -155,18 +159,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadingIndicator.style.display = 'none';
                 exportImageBtn.classList.add('disabled');
                 exportVideoBtn.classList.remove('disabled');
-                
-                // Show video controls automatically when video is loaded
-                videoControls.classList.add('show');
+                document.querySelector('.video-export-config').classList.add('show');
             };
             
             video.onerror = () => {
                 console.error('Error loading video');
                 loadingIndicator.style.display = 'none';
+                tutorialOverlay.classList.remove('hidden');
             };
         } else {
             alert('Please upload an image or video file.');
             loadingIndicator.style.display = 'none';
+            tutorialOverlay.classList.remove('hidden');
         }
     }
 
@@ -239,15 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
     controls.videoFormat.forEach(format => {
         format.addEventListener('change', (e) => {
             const parentLabel = e.target.closest('.radio-option');
-            const dropdownLabel = e.target.closest('.control-group').querySelector('.dropdown-label span');
-            const formatText = e.target.value === 'mp4' ? 'MP4 (H264)' : 'WebM (VP9)';
-            
-            // Update dropdown label
-            dropdownLabel.textContent = `Format: ${formatText}`;
-            
-            // Update active state
-            e.target.closest('.radio-group').querySelectorAll('.radio-option').forEach(opt => {
-                opt.classList.remove('active');
+            document.querySelectorAll('input[name="video-format"]').forEach(input => {
+                input.closest('.radio-option').classList.remove('active');
             });
             parentLabel.classList.add('active');
             
@@ -261,19 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
     controls.videoQuality.forEach(quality => {
         quality.addEventListener('change', (e) => {
             const parentLabel = e.target.closest('.radio-option');
-            const dropdownLabel = e.target.closest('.control-group').querySelector('.dropdown-label span');
-            const resolutionMap = {
-                'low': '480p',
-                'medium': '720p',
-                'high': '1080p'
-            };
-            
-            // Update dropdown label
-            dropdownLabel.textContent = `Resolution: ${resolutionMap[e.target.value]}`;
-            
-            // Update active state
-            e.target.closest('.radio-group').querySelectorAll('.radio-option').forEach(opt => {
-                opt.classList.remove('active');
+            document.querySelectorAll('input[name="video-quality"]').forEach(input => {
+                input.closest('.radio-option').classList.remove('active');
             });
             parentLabel.classList.add('active');
             
@@ -287,14 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
     controls.videoFps.forEach(fps => {
         fps.addEventListener('change', (e) => {
             const parentLabel = e.target.closest('.radio-option');
-            const dropdownLabel = e.target.closest('.control-group').querySelector('.dropdown-label span');
-            
-            // Update dropdown label
-            dropdownLabel.textContent = `FPS: ${e.target.value}`;
-            
-            // Update active state
-            e.target.closest('.radio-group').querySelectorAll('.radio-option').forEach(opt => {
-                opt.classList.remove('active');
+            document.querySelectorAll('input[name="video-fps"]').forEach(input => {
+                input.closest('.radio-option').classList.remove('active');
             });
             parentLabel.classList.add('active');
             
@@ -405,25 +385,13 @@ document.addEventListener('DOMContentLoaded', () => {
         link.click();
     });
     
-    exportVideoBtn.addEventListener('click', () => {
-        if (activeVideoProcessor) {
-            exportVideoBtn.textContent = 'Recording...';
-            exportVideoBtn.classList.add('recording');
-            
-            try {
-                const recordingDuration = activeVideoProcessor.startRecording();
-                
-                setTimeout(() => {
-                    exportVideoBtn.textContent = 'Export Video';
-                    exportVideoBtn.classList.remove('recording');
-                }, recordingDuration + 500);
-            } catch (error) {
-                console.error('Export error:', error);
-                alert('Video recording failed. Your browser might not support this feature. Please try using a modern version of Chrome or Firefox.');
-                exportVideoBtn.textContent = 'Export Video';
-                exportVideoBtn.classList.remove('recording');
-            }
-        }
+    // Export video UI handling
+    const videoExportConfig = document.querySelector('.video-export-config');
+
+    // Toggle export video config
+    exportVideoBtn.addEventListener('click', (e) => {
+        if (!activeVideoProcessor) return;
+        videoExportConfig.classList.toggle('show');
     });
 
     // Theme handling
