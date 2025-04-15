@@ -129,12 +129,12 @@ main {
 @media (min-width: 768px) {
     main {
         flex-direction: row;
+        border-radius: 12px;
     }
 }
 
 .preview-area {
     flex: 1;
-    background-color: var(--bg-light);
     border-radius: 12px;
     display: flex;
     justify-content: center;
@@ -150,7 +150,7 @@ main {
     height: auto;
     display: block;
     margin: 0px;
-    border-radius: 0;
+    border-radius: 12;
 }
 
 .loading-indicator {
@@ -165,8 +165,7 @@ main {
 
 .control-panel {
     width: 100%;
-    max-width: 300px;
-    background-color: var(--bg-light);
+    max-width: 350px;
     border-radius: 12px;
     padding: 15px;
     display: flex;
@@ -175,6 +174,8 @@ main {
     height: fit-content;
     overflow-y: auto;
     max-height: calc(100vh - 100px);
+    border: 1px solid rgb(69, 69, 69);
+    margin: 0px 10px 10px 10px;
 }
 
 .panel-section {
@@ -205,7 +206,7 @@ main {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 6px;
 }
 
 .control-group:last-child {
@@ -213,9 +214,11 @@ main {
 }
 
 .control-group label {
+    margin-bottom: 2px;
+    margin-top: 8px;
     font-size: 12px;
     color: var(--text);
-    opacity: 0.9;
+    opacity: 0.8;
 }
 
 .slider-control {
@@ -291,6 +294,7 @@ main {
     transition: all 0.2s;
     overflow: hidden;
     background-color: var(--bg-dark);
+    margin-top: 12px;
 }
 
 .color-preview:hover {
@@ -318,14 +322,14 @@ input[type="color"] {
 .video-controls {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 6px;
 }
 
 .video-controls h4 {
     font-size: 12px;
     color: var(--text);
-    margin-bottom: 8px;
-    opacity: 0.8;
+    margin-bottom: 1px;
+    opacity: 0.9;
 }
 
 .video-controls .control-group {
@@ -335,23 +339,22 @@ input[type="color"] {
 }
 
 .video-controls .radio-group.simple {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    border-radius: 4px;
 }
 
 .video-controls .radio-group.simple .radio-option {
-    flex: 1;
-    min-width: 80px;
     padding: 8px 12px;
     background: var(--bg-light);
-    border: 1px solid transparent;
+    border: 1px solid rgb(42, 42, 42);
     border-radius: 4px;
     font-size: 12px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .video-controls .radio-group.simple .radio-option:hover {
@@ -360,9 +363,10 @@ input[type="color"] {
 }
 
 .video-controls .radio-group.simple .radio-option.active {
-    background: var(--bg-light);
-    color: var(--bg-dark);
+    background: var(--bg-dark);
+    color: var(--accent);
     opacity: 1;
+    border: 1px solid var(--accent);
 }
 
 .start-export-btn {
@@ -377,6 +381,7 @@ input[type="color"] {
     cursor: pointer;
     margin-top: 8px;
     transition: all 0.2s;
+    position: relative;
 }
 
 .start-export-btn:hover {
@@ -387,12 +392,78 @@ input[type="color"] {
 .start-export-btn.recording {
     background-color: #ff3838;
     animation: pulse 1.5s infinite;
+    padding-left: 32px;
 }
 
 .start-export-btn.recording::before {
-    content: '⚫ ';
-    color: var(--bg-dark);
-    animation: pulse 1s infinite;
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-color: var(--bg-dark);
+    border-radius: 50%;
+    animation: recordingPulse 1s infinite;
+}
+
+.recording-status {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background: var(--bg-dark);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--accent);
+}
+
+.recording-status.active {
+    display: flex;
+}
+
+.recording-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background-color: #ff3838;
+    border-radius: 50%;
+    animation: recordingPulse 1s infinite;
+}
+
+.recording-status .time {
+    margin-left: auto;
+    font-family: monospace;
+}
+
+@keyframes recordingPulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 /* Panel Header Styles */
@@ -485,7 +556,7 @@ input[type="radio"] {
 .pattern-control .radio-group {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 12px;
     width: 100%;
 }
 
@@ -496,7 +567,7 @@ input[type="radio"] {
     text-align: center;
     padding: 8px 12px;
     background: var(--bg-dark);
-    border: 1px solid transparent;
+    border: 1px solid rgb(42, 42, 42);;
     border-radius: 4px;
     font-size: 13px;
     transition: all 0.2s ease;
@@ -526,7 +597,7 @@ input[type="radio"] {
 .radio-option {
     position: relative;
     background-color: var(--bg-light);
-    border: 1px solid transparent;
+    border: 1px solid rgb(42, 42, 42);;
     border-radius: 6px;
     padding: 12px 24px;
     cursor: pointer;
@@ -538,7 +609,7 @@ input[type="radio"] {
 
 .radio-option:hover {
     border-color: var(--accent);
-    background-color: rgba(191, 255, 56, 0.05);
+    background-color: rgba(125, 125, 125, 0.05);
 }
 
 .radio-option.active {
@@ -548,6 +619,7 @@ input[type="radio"] {
 
 .pattern-control .radio-option::before {
     display: none;
+    background-color: var(--accent);
 }
 
 .export-options {
@@ -555,7 +627,7 @@ input[type="radio"] {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     width: 100%;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 
 .export-options button {
@@ -582,7 +654,6 @@ input[type="radio"] {
 
 .video-export-config {
     display: none;
-    margin-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 16px;
 }

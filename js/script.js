@@ -408,4 +408,58 @@ document.addEventListener('DOMContentLoaded', () => {
         sunIcon.style.display = theme === 'light' ? 'none' : 'block';
         moonIcon.style.display = theme === 'light' ? 'block' : 'none';
     }
+
+    // Start recording button handler
+    const startExportBtn = document.querySelector('.start-export-btn');
+    const recordingStatus = document.querySelector('.recording-status');
+    const recordingTime = recordingStatus.querySelector('.time');
+    let recordingTimer = null;
+
+    function formatTime(ms) {
+        const seconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    function updateRecordingTime(startTime) {
+        const elapsed = Date.now() - startTime;
+        recordingTime.textContent = formatTime(elapsed);
+    }
+
+    startExportBtn.addEventListener('click', () => {
+        if (activeVideoProcessor) {
+            try {
+                const recordingDuration = activeVideoProcessor.startRecording();
+                const startTime = Date.now();
+                
+                // Update UI for recording state
+                startExportBtn.textContent = 'Recording...';
+                startExportBtn.classList.add('recording');
+                recordingStatus.classList.add('active');
+                
+                // Start timer
+                recordingTimer = setInterval(() => updateRecordingTime(startTime), 1000);
+                
+                setTimeout(() => {
+                    // Reset UI after recording
+                    startExportBtn.textContent = 'Start Recording';
+                    startExportBtn.classList.remove('recording');
+                    recordingStatus.classList.remove('active');
+                    clearInterval(recordingTimer);
+                    recordingTime.textContent = '00:00';
+                }, recordingDuration + 500);
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Video recording failed. Your browser might not support this feature. Please try using a modern version of Chrome or Firefox.');
+                startExportBtn.textContent = 'Start Recording';
+                startExportBtn.classList.remove('recording');
+                recordingStatus.classList.remove('active');
+                if (recordingTimer) {
+                    clearInterval(recordingTimer);
+                }
+                recordingTime.textContent = '00:00';
+            }
+        }
+    });
 });
