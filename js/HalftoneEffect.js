@@ -240,12 +240,24 @@ class HalftoneEffect {
                 break;
 
             case 'crt':
-                const color = this.hexToRgb(this.settings.color);
                 const opacity = size / this.settings.dotSize;
                 
-                this.ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`;
+                // Red dot
+                this.ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                this.ctx.beginPath();
+                this.ctx.arc(x - size * 0.4 - size * 0.2, y, size * 0.4, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Green dot
+                this.ctx.fillStyle = `rgba(0, 255, 0, ${opacity})`;
                 this.ctx.beginPath();
                 this.ctx.arc(x, y, size * 0.4, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Blue dot
+                this.ctx.fillStyle = `rgba(0, 0, 255, ${opacity})`;
+                this.ctx.beginPath();
+                this.ctx.arc(x + size * 0.4 + size * 0.2, y, size * 0.4, 0, Math.PI * 2);
                 this.ctx.fill();
                 break;
         }
