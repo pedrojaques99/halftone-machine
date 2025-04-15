@@ -134,23 +134,24 @@ main {
 }
 
 .preview-area {
-    flex: 1;
-    border-radius: 12px;
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    max-height: 1200px;
+    margin: 0 auto;
+    background: var(--bg-dark);
+    border-radius: 8px;
+    overflow: hidden;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    min-height: 300px;
-    position: relative;
-    overflow: hidden;
-    padding: 0;
+    align-items: center;
 }
 
 #preview-canvas {
-    width: auto;
-    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
     display: block;
-    margin: 0px;
-    border-radius: 12;
 }
 
 .loading-indicator {

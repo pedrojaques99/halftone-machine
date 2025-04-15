@@ -91,7 +91,7 @@ function initializeTutorialArea() {
     });
 
     tutorialOverlay.addEventListener('drop', (e) => {
-        e.preventDefault();
+    e.preventDefault();
         tutorialOverlay.classList.remove('drag-over');
         const file = e.dataTransfer.files[0];
         if (file) {

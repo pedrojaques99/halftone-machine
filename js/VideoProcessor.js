@@ -67,10 +67,20 @@ class VideoProcessor {
     start() {
         if (this.isProcessing) return;
         
-        // Set initial canvas size
+        // Set initial canvas size with constraints
         const videoAspect = this.video.videoWidth / this.video.videoHeight;
-        const targetWidth = Math.min(this.processingResolution.width, window.innerWidth * 0.8);
-        const targetHeight = targetWidth / videoAspect;
+        const maxWidth = 1200;
+        const maxHeight = 800;
+        
+        // Calculate target dimensions while maintaining aspect ratio
+        let targetWidth = Math.min(maxWidth, this.video.videoWidth);
+        let targetHeight = targetWidth / videoAspect;
+        
+        // If height exceeds maxHeight, recalculate based on height constraint
+        if (targetHeight > maxHeight) {
+            targetHeight = maxHeight;
+            targetWidth = targetHeight * videoAspect;
+        }
         
         this.canvas.width = targetWidth;
         this.canvas.height = targetHeight;

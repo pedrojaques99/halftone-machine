@@ -31,8 +31,14 @@ class HalftoneProcessor {
     }
 
     setupCanvas(img) {
-        const maxWidth = 800;
-        const scale = Math.min(1, maxWidth / img.width);
+        const maxWidth = 1200;
+        const maxHeight = 1200;
+        
+        // Calculate scale based on both width and height constraints
+        const widthScale = maxWidth / img.width;
+        const heightScale = maxHeight / img.height;
+        const scale = Math.min(1, Math.min(widthScale, heightScale));
+        
         this.canvas.width = img.width * scale;
         this.canvas.height = img.height * scale;
         this.ctx.fillStyle = 'white';
